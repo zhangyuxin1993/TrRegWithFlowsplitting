@@ -209,6 +209,10 @@ public class opWorkingGrooming {
 				file_io.filewrite2(OutFileName, "保护路径在光层无法建立");
 			}
 		}
+		file_io.filewrite2(OutFileName, "工作路径在光层路由");
+		opnewRoute.OutputRoute_node(opnewRoute, OutFileName);
+		file_io.filewrite2(OutFileName, "");
+		file_io.filewrite2(OutFileName,"工作路径光层路由flag=" + opworkflag);
 		return opworkflag;
 	}
 }

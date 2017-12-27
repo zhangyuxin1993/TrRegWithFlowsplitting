@@ -13,6 +13,7 @@ public class VirtualLink {
 	private double cost=0;
 	private double length=0;
 	private ArrayList<Link> physicallink=new ArrayList<Link>();
+	private int MaybeUseFlow = 0;
 	
 	public VirtualLink(String srcnode,String desnode,int nature,int restcapacity) {
 		this.restcapacity = restcapacity;
@@ -20,6 +21,13 @@ public class VirtualLink {
 		this.desnode = desnode;
 		this.nature = nature;
 	}
+	public void setMaybeUseFlow(int  MaybeUseFlow) {
+		this.MaybeUseFlow=MaybeUseFlow;
+	}
+	public int getMaybeUseFlow() {
+		return MaybeUseFlow;
+	}
+	
 	public void setcost(double  cost) {
 		this.cost=cost;
 	}

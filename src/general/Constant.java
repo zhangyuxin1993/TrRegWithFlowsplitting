@@ -29,6 +29,6 @@ public class Constant {
 	public final static double Cost_IP_reg_QPSK=1.69;  
 	public final static double Cost_IP_reg_8QAM=1.95;   
 	public final static double Cost_IP_reg_16QAM=2.21;   
-	public final static int MinSlotinLightpath=8;	
+	public final static int MinSlotinLightpath=5;	
 }
 

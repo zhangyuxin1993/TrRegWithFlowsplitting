@@ -58,27 +58,8 @@ public class Test {
 	}
 
 	public static void main(String[] args) {
-		 Network network = new Network("ip over EON", 0, null);
-		 network.readPhysicalTopology("G:/Topology/testtop.csv");
-		 network.copyNodes();
-		 network.createNodepair();//
-		ArrayList<Node> no=new ArrayList<>();
-		 
-		 Layer oplayer = network.getLayerlist().get("Physical");
-		 Layer iplayer = network.getLayerlist().get("Layer0");
-
-		Node node1=new Node("N2", 0, null, oplayer, 0, 0);
-		no.add(node1);
-		Node node2=new Node("N2", 0, null, oplayer, 0, 0);
-		no.add(node2);
 		
-		System.out.println(no.size());
-		no.remove(node2);
-		System.out.println(no.size());
 
-		for(Node node:no){
-			System.out.println(node.getName());
-		}
 		 /*
 		 * 测试从M个数中随机抽取m个数的所有情况
 		 */

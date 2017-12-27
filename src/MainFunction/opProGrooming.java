@@ -43,8 +43,10 @@ public class opProGrooming {// 光层路由保护
 		file_io.filewrite2(OutFileName, "************保护路由在IP层不能路由，需要在光层新建");
 
 		// 删除该节点对的工作路由经过的所有物理链路
+//		file_io.filewrite2(OutFileName, "！！!!!!!! 工作路由为");
+//		route.OutputRoute_node(route, OutFileName);
+//		file_io.filewrite2(OutFileName, " ");
 		for (Link LinkOnRoute : route.getLinklist()) {// 取出工作路由中的链路
-			// System.out.println("工作路径链路：" + LinkOnRoute.getName());
 			if (flag) {//// flag=true表示保护 IP层建立的工作路径
 				for (VirtualLink Vlink : LinkOnRoute.getVirtualLinkList()) {
 					for (Link LinkOnPhy : Vlink.getPhysicallink()) {// 取出某一工作链路上对应的物理链路

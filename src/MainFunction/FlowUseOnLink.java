@@ -4,10 +4,9 @@ import network.VirtualLink;
 
 public class FlowUseOnLink {
 	private VirtualLink vlink;
-	private int FlowUseOnLink;
-	
+	private double FlowUseOnLink;
  
-	public FlowUseOnLink(VirtualLink vlink, int flowUseOnLink) {
+	public FlowUseOnLink(VirtualLink vlink, double flowUseOnLink) {
 		super();
 		this.vlink = vlink;
 		FlowUseOnLink = flowUseOnLink;
@@ -20,7 +19,7 @@ public class FlowUseOnLink {
 		return vlink;
 	}
 	
-	public void setFlowUseOnLink(int FlowUseOnLink) {
+	public void setFlowUseOnLink(double FlowUseOnLink) {
 		this.FlowUseOnLink=FlowUseOnLink;
 	}
 	public double getFlowUseOnLink() {

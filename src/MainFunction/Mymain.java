@@ -17,14 +17,14 @@ import network.VirtualLink;
 import subgraph.LinearRoute;
 
 public class Mymain {
-//	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239.dat";
-//	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239_FinalResult.dat";
-	public static String OutFileName = "F:\\zyx\\programFile\\cost239.dat";
-	public static String FinalResultFile = "F:\\zyx\\programFile\\cost239_FinalResult.dat";
+	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\6.dat";
+	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\6_FinalResult.dat";
+//	public static String OutFileName = "F:\\zyx\\programFile\\cost239.dat";
+//	public static String FinalResultFile = "F:\\zyx\\programFile\\cost239_FinalResult.dat";
 	public static void main(String[] args) throws IOException {
-//		String TopologyName = "D:/zyx/Topology/cost239.csv";
-		String TopologyName = "F:/zyx/Topology/cost239.csv";
-		int DemandNum=40;
+		String TopologyName = "D:/zyx/Topology/6.csv";
+//		String TopologyName = "F:/zyx/Topology/6.csv";
+		int DemandNum=10;
 		int numOfTransponder = 0;
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -52,11 +52,11 @@ public class Mymain {
 		/*
 		 * 设置threshold循环
 		 */
-		for(float threshold=(float) 0;threshold<=1.05; threshold=(float) (threshold+0.1)){
+		for(float threshold=(float) 0.5;threshold<=1.05; threshold=(float) (threshold+1)){
 			double bestResult=100000;
 			int bestshuffle=1000,NumOfIPreg=0,NumofOEOreg=0;
 			
-		for(int shuffle=0;shuffle<30;shuffle++){//打乱次序100次
+		for(int shuffle=0;shuffle<1;shuffle++){//打乱次序100次
 			double TotalWorkCost=0,TotalProCost=0;
 			file_io.filewrite2(OutFileName, " ");
 			file_io.filewrite2(FinalResultFile, " ");
@@ -94,7 +94,7 @@ public class Mymain {
 				System.out.println("正在操作的节点对： " + nodepair.getName() + "  他的流量需求是： " + nodepair.getTrafficdemand());
 				file_io.filewrite2(OutFileName, "正在操作的节点对： " + nodepair.getName() + "  他的流量需求是： " + nodepair.getTrafficdemand());
 				
-				if(nodepair.getTrafficdemand()<40 ){
+				if(nodepair.getTrafficdemand()<30 ){
 					SmallNodePairList.add(nodepair);
 					continue;
 				}
@@ -545,7 +545,6 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,int numOf
 	if (iproutingFlag) {// ip层工作路由成功 建立保护
 		ipProGrooming ipprog = new ipProGrooming();
 		ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, ipWorkRoute, numOfTransponder, true,wprlist);
-		
 		if (!ipproFlag) {// 在ip层保护路由受阻 则在光层路由保护
 			opProGrooming opg = new opProGrooming();
 			opg.opprotectiongrooming(iplayer, oplayer, nodepair, ipWorkRoute, numOfTransponder, true, wprlist,threshold,rowList,FlowUseList);
