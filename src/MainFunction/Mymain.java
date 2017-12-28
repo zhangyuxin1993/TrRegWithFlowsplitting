@@ -17,14 +17,14 @@ import network.VirtualLink;
 import subgraph.LinearRoute;
 
 public class Mymain {
-	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\6.dat";
-	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\6_FinalResult.dat";
+	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239.dat";
+	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239_FinalResult.dat";
 //	public static String OutFileName = "F:\\zyx\\programFile\\cost239.dat";
 //	public static String FinalResultFile = "F:\\zyx\\programFile\\cost239_FinalResult.dat";
 	public static void main(String[] args) throws IOException {
-		String TopologyName = "D:/zyx/Topology/6.csv";
-//		String TopologyName = "F:/zyx/Topology/6.csv";
-		int DemandNum=10;
+		String TopologyName = "D:/zyx/Topology/cost239.csv";
+//		String TopologyName = "F:/zyx/Topology/cost239.csv";
+		int DemandNum=40;
 		int numOfTransponder = 0;
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -46,17 +46,17 @@ public class Mymain {
 		}
 		//以下可以读取表格中的业务
 //		ReadDemand rd=new ReadDemand();
-//		RadomNodepairlist=rd.readDemand(iplayer_base, "f:\\zyx\\cost239Traffic.csv");
+//		RadomNodepairlist=rd.readDemand(iplayer_base, "f:\\zyx\\USNETTraffic.csv");
 //		RadomNodepairlist=rd.readDemand(iplayer_base, "D:/cost239Traffic.csv");
  
 		/*
 		 * 设置threshold循环
 		 */
-		for(float threshold=(float) 0.5;threshold<=1.05; threshold=(float) (threshold+1)){
+		for(float threshold=(float) 0;threshold<=1.05; threshold=(float) (threshold+0.1)){
 			double bestResult=100000;
 			int bestshuffle=1000,NumOfIPreg=0,NumofOEOreg=0;
 			
-		for(int shuffle=0;shuffle<1;shuffle++){//打乱次序100次
+		for(int shuffle=0;shuffle<10;shuffle++){//打乱次序100次
 			double TotalWorkCost=0,TotalProCost=0;
 			file_io.filewrite2(OutFileName, " ");
 			file_io.filewrite2(FinalResultFile, " ");
@@ -87,14 +87,12 @@ public class Mymain {
 			
 			for (int n = 0; n < demandlist.size(); n++) {
 				NodePair nodepair = demandlist.get(n);
-//				System.out.println();
-//				System.out.println();
 				file_io.filewrite2(OutFileName, "");
 				file_io.filewrite2(OutFileName, "");
 				System.out.println("正在操作的节点对： " + nodepair.getName() + "  他的流量需求是： " + nodepair.getTrafficdemand());
 				file_io.filewrite2(OutFileName, "正在操作的节点对： " + nodepair.getName() + "  他的流量需求是： " + nodepair.getTrafficdemand());
 				
-				if(nodepair.getTrafficdemand()<30 ){
+				if(nodepair.getTrafficdemand()<50 ){
 					SmallNodePairList.add(nodepair);
 					continue;
 				}
@@ -541,10 +539,10 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,int numOf
 	ArrayList<FlowUseOnLink> FlowUseList=new ArrayList<>();
 	
 	IPWorkingGrooming ipwg = new IPWorkingGrooming();
-	iproutingFlag = ipwg.ipWorkingGrooming(nodepair, iplayer, oplayer, numOfTransponder, ipWorkRoute, wprlist,FlowUseList);// 在ip层工作路由
+	iproutingFlag = ipwg.ipWorkingGrooming(nodepair, iplayer, oplayer, numOfTransponder, wprlist,FlowUseList);// 在ip层工作路由
 	if (iproutingFlag) {// ip层工作路由成功 建立保护
 		ipProGrooming ipprog = new ipProGrooming();
-		ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, ipWorkRoute, numOfTransponder, true,wprlist);
+		ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, numOfTransponder, true,wprlist);
 		if (!ipproFlag) {// 在ip层保护路由受阻 则在光层路由保护
 			opProGrooming opg = new opProGrooming();
 			opg.opprotectiongrooming(iplayer, oplayer, nodepair, ipWorkRoute, numOfTransponder, true, wprlist,threshold,rowList,FlowUseList);
@@ -554,11 +552,10 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,int numOf
 	// ip层工作路由不成功 在光层路由工作
 	if (!iproutingFlag) {
 		opWorkingGrooming opwg = new opWorkingGrooming();
-		opworkFlag = opwg.opWorkingGrooming(nodepair, iplayer, oplayer, opWorkRoute, wprlist,rowList);
-		if (opworkFlag) {// 在光层成功建立工作路径后建立保护路径
+		opWorkRoute = opwg.opWorkingGrooming(nodepair, iplayer, oplayer, wprlist,rowList);
+		if (opWorkRoute.getLinklist().size()!=0) {// 在光层成功建立工作路径后建立保护路径
 			ipProGrooming ipprog = new ipProGrooming();
-			ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, opWorkRoute, numOfTransponder,
-					false, wprlist);
+			ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, numOfTransponder,false, wprlist);
 			if (!ipproFlag) {// 在ip层保护路由受阻 则在光层路由保护
 				opProGrooming opg = new opProGrooming();
 				opg.opprotectiongrooming(iplayer, oplayer, nodepair, opWorkRoute, numOfTransponder, false,

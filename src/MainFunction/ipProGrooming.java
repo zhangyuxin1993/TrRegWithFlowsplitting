@@ -16,15 +16,9 @@ import subgraph.LinearRoute;
 
 public class ipProGrooming {
 	String OutFileName =Mymain.OutFileName;
-	public boolean ipprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair, LinearRoute route,
-			int numOfTransponder, boolean flag, ArrayList<WorkandProtectRoute> wprlist) throws IOException {// flag=true表示保护IP层建立的工作路径
+	public boolean ipprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair,int numOfTransponder, boolean flag, ArrayList<WorkandProtectRoute> wprlist) throws IOException {// flag=true表示保护IP层建立的工作路径
 		Test t = new Test();
 		file_out_put file_io=new file_out_put();
-		
-		file_io.filewrite2(OutFileName, "工作路径在光层路由传到保护IP层时11");
-		route.OutputRoute_node(route, OutFileName);
-		file_io.filewrite2(OutFileName, "");
-		 
 		
 		file_io.filewrite2(OutFileName,"  ");
 		file_io.filewrite2(OutFileName,"开始保护路由" );
@@ -33,19 +27,19 @@ public class ipProGrooming {
 		ArrayList<Link> DelIPLinkList = new ArrayList<Link>();
 		ArrayList<Link> totallink = new ArrayList<>();
 		
-		HashMap<String, Link> linklisttest = iplayer.getLinklist();
-		ArrayList<VirtualLink> VirtualLinklist = new ArrayList<VirtualLink>();
-		Iterator<String> linkitortest = linklisttest.keySet().iterator();
-		while (linkitortest.hasNext()) {
-			Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
-			file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
-			VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
-			for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
-			file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
-			+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
-			
-			}
-		}
+//		HashMap<String, Link> linklisttest = iplayer.getLinklist();
+//		ArrayList<VirtualLink> VirtualLinklist = new ArrayList<VirtualLink>();
+//		Iterator<String> linkitortest = linklisttest.keySet().iterator();
+//		while (linkitortest.hasNext()) {
+//			Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
+//			file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
+//			VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
+//			for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
+//			file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
+//			+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
+//			
+//			}
+//		}
 
 		//test
 //		for(WorkandProtectRoute wprpro:wprlist){
@@ -144,7 +138,21 @@ public class ipProGrooming {
 			iplayer.removeLink(link.getName());
 		}
 		// 以上为判断ip层中的链路那些需要删除
-
+	
+		HashMap<String, Link> linklisttest = iplayer.getLinklist();
+		ArrayList<VirtualLink> VirtualLinklist = new ArrayList<VirtualLink>();
+		Iterator<String> linkitortest = linklisttest.keySet().iterator();
+		while (linkitortest.hasNext()) {
+			Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
+//			file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
+			VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
+			for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
+//			file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
+//			+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
+			
+			}
+		}
+		
 		FlowSplitting fs=new FlowSplitting();
 		ArrayList<FlowUseOnLink> FlowUseList=new ArrayList<>();
 		boolean  ipproflag=fs.flowsplitting(iplayer, nodepair, FlowUseList	, totallink);
@@ -196,10 +204,7 @@ public class ipProGrooming {
 		else{
 			file_io.filewrite2(OutFileName,"保护路径在IP层路由失败");
 		}
-		file_io.filewrite2(OutFileName, "工作路径在光层路由传到保护IP层时");
-		route.OutputRoute_node(route, OutFileName);
-		file_io.filewrite2(OutFileName, "");
-		file_io.filewrite2(OutFileName,"保护路径IP层路由flag=" + ipproflag);
+		
 		return ipproflag;
 	}
 

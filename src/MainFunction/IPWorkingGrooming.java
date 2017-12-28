@@ -18,8 +18,7 @@ import subgraph.LinearRoute;
 
 public class IPWorkingGrooming {
 	String OutFileName =Mymain.OutFileName;
-	public boolean ipWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,int numOfTransponder,LinearRoute newRoute
-			, ArrayList<WorkandProtectRoute> wprlist,ArrayList<FlowUseOnLink> FlowUseList) throws IOException {
+	public boolean ipWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,int numOfTransponder, ArrayList<WorkandProtectRoute> wprlist,ArrayList<FlowUseOnLink> FlowUseList) throws IOException {
 //		boolean routeFlag=false;
 		file_out_put file_io=new file_out_put();
 		ArrayList<VirtualLink> DelVirtualLinklist = new ArrayList<VirtualLink>();
@@ -29,20 +28,18 @@ public class IPWorkingGrooming {
 		ArrayList<VirtualLink> VirtualLinklist = new ArrayList<VirtualLink>();
 
 		//test
-//			System.out.println("IP层上的链路条数为：" +  iplayer.getLinklist().size());
-			file_io.filewrite2(OutFileName,"IP层上的链路条数为：" +  iplayer.getLinklist().size());
-			HashMap<String, Link> linklisttest = iplayer.getLinklist();
-			Iterator<String> linkitortest = linklisttest.keySet().iterator();
-			while (linkitortest.hasNext()) {
-				Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
-				file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
-				VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
-				for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
-				file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
-				+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
-				
-				}
-			}
+//			file_io.filewrite2(OutFileName,"IP层上的链路条数为：" +  iplayer.getLinklist().size());
+//			HashMap<String, Link> linklisttest = iplayer.getLinklist();
+//			Iterator<String> linkitortest = linklisttest.keySet().iterator();
+//			while (linkitortest.hasNext()) {
+//				Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
+//				file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
+//				VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
+//				for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
+//				file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
+//				+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
+//				}
+//			}
 			
 //			删除剩余流量为0的虚拟链路  不需要在最后恢复 只有这里删除的链路（IP 虚拟）不需要恢复 其他均需要恢复
 			ArrayList<VirtualLink> DelNoFlowVlink= new ArrayList<>();
@@ -53,8 +50,6 @@ public class IPWorkingGrooming {
 				Link IPlink = (Link) (linklist.get(linkitor.next()));
 				DelNoFlowVlink.clear();
 				for(VirtualLink vlink: IPlink.getVirtualLinkList()){
-					file_io.filewrite2(OutFileName,"IP层链路"+ IPlink.getName()+" 上虚拟链路"+vlink.getSrcnode()+"-"+vlink.getDesnode()
-					+"已使用的流量为 "+ vlink.getUsedcapacity() +"  剩余的流量为 "+vlink.getRestcapacity());
 					if(vlink.getRestcapacity()==0){
 						DelNoFlowVlink.add(vlink);
 					}

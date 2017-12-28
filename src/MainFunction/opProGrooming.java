@@ -221,41 +221,20 @@ public class opProGrooming {// 光层路由保护
 						// numOfTransponder = numOfTransponder + 2;
 
 						if (findflag) {// 如果在IP层中已经找到该链路
-							// System.out.println("虚拟链路条数：" +
-							// finlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "虚拟链路条数：" + finlink.getVirtualLinkList().size());
 							finlink.getVirtualLinkList().add(Vlink);
-							// System.out.println("IP层已存在的链路 " +
-							// finlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
-							// + Vlink.getUsedcapacity() + "\n" + "共有的flow: " +
-							// Vlink.getFullcapacity()
-							// + " 预留的flow： " + Vlink.getRestcapacity() );
 							file_io.filewrite2(OutFileName,
 									"IP层已存在的链路 " + finlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
 											+ Vlink.getUsedcapacity() + "\n" + "共有的flow:  " + Vlink.getFullcapacity()
 											+ "    预留的flow：  " + Vlink.getRestcapacity());
-							// System.out.println("*********已存在IP层链路： " +
-							// finlink.getName() + " 上的虚拟链路条数： "
-							// + finlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "*********已存在IP层链路：  " + finlink.getName() + "  上的虚拟链路条数： "
 									+ finlink.getVirtualLinkList().size());
 						} else {
-							// System.out.println("虚拟链路条数：" +
-							// createlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "虚拟链路条数：" + createlink.getVirtualLinkList().size());
 							createlink.getVirtualLinkList().add(Vlink);
-							// System.out.println("IP层上新建链路 " +
-							// createlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
-							// + Vlink.getUsedcapacity() + "\n" + "共有的flow: " +
-							// Vlink.getFullcapacity()
-							// + " 预留的flow： " + Vlink.getRestcapacity() );
-							file_io.filewrite2(OutFileName,
-									"IP层上新建链路 " + createlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
+							file_io.filewrite2(OutFileName,"IP层上新建链路 " + createlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
 											+ Vlink.getUsedcapacity() + "\n " + "共有的flow:  " + Vlink.getFullcapacity()
 											+ "    预留的flow：  " + Vlink.getRestcapacity());
-							// System.out.println("*********新建IP链路： " +
-							// createlink.getName() + " 上的虚拟链路条数： "+
-							// createlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "*********新建IP链路：  " + createlink.getName() + "  上的虚拟链路条数： "
 									+ createlink.getVirtualLinkList().size());
 						}
@@ -292,7 +271,7 @@ public class opProGrooming {// 光层路由保护
 				if (count2 == routeList.size() - 1) {
 					file_io.filewrite2(OutFileName, "保护路径在光层无法建立");
 					// 保护无法建立时 工作也要对应删除
-					for (int m = 0; m < rowList.size(); m++) {
+					for (int m = 0; m < rowList.size(); m++) {//释放工作占用的FS
 						RequestOnWorkLink row = rowList.get(m);
 						Request WorkRequest = row.getWorkRequest();
 						Link link = row.getWorkLink();
@@ -301,7 +280,7 @@ public class opProGrooming {// 光层路由保护
 						}
 						link.setMaxslot(link.getMaxslot() - row.getSlotNum());
 					}
-					for (int m = 0; m < FlowUseList.size(); m++) {
+					for (int m = 0; m < FlowUseList.size(); m++) {//释放工作占用的IP flow
 						FlowUseOnLink fuo = FlowUseList.get(m);
 						VirtualLink vlink = fuo.getVlink();
 						vlink.setUsedcapacity(vlink.getUsedcapacity() - fuo.getFlowUseOnLink());

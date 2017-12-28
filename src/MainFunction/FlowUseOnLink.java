@@ -4,7 +4,7 @@ import network.VirtualLink;
 
 public class FlowUseOnLink {
 	private VirtualLink vlink;
-	private double FlowUseOnLink;
+	private double FlowUseOnLink=0;
  
 	public FlowUseOnLink(VirtualLink vlink, double flowUseOnLink) {
 		super();

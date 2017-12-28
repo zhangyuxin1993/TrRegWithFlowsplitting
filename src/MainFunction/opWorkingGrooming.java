@@ -19,8 +19,7 @@ import subgraph.LinearRoute;
 public class opWorkingGrooming {
 	String OutFileName = Mymain.OutFileName;
 
-	public boolean opWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer, LinearRoute opnewRoute,
-			ArrayList<WorkandProtectRoute> wprlist, ArrayList<RequestOnWorkLink> rowList) throws IOException {
+	public LinearRoute opWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,ArrayList<WorkandProtectRoute> wprlist, ArrayList<RequestOnWorkLink> rowList) throws IOException {
 		RouteSearching Dijkstra = new RouteSearching();
 		boolean opworkflag = false;
 		Node srcnode = nodepair.getSrcNode();
@@ -37,7 +36,7 @@ public class opWorkingGrooming {
 		Node opdesnode = oplayer.getNodelist().get(desnode.getName());
 
 		// 在光层新建光路的时候不需要考虑容量的问题
-
+		LinearRoute opnewRoute=new LinearRoute(null, 0, null);
 		Dijkstra.Kshortest(opsrcnode, opdesnode, oplayer, 10, routeList);
 
 		for (int count = 0; count < routeList.size(); count++) {
@@ -209,10 +208,7 @@ public class opWorkingGrooming {
 				file_io.filewrite2(OutFileName, "保护路径在光层无法建立");
 			}
 		}
-		file_io.filewrite2(OutFileName, "工作路径在光层路由");
-		opnewRoute.OutputRoute_node(opnewRoute, OutFileName);
-		file_io.filewrite2(OutFileName, "");
-		file_io.filewrite2(OutFileName,"工作路径光层路由flag=" + opworkflag);
-		return opworkflag;
+	 
+		return opnewRoute;
 	}
 }
