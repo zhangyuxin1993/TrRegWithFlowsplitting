@@ -17,14 +17,14 @@ import network.VirtualLink;
 import subgraph.LinearRoute;
 
 public class Mymain {
-	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239.dat";
-	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239_FinalResult.dat";
+	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\6.dat";
+	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\6_FinalResult.dat";
 //	public static String OutFileName = "F:\\zyx\\programFile\\cost239.dat";
 //	public static String FinalResultFile = "F:\\zyx\\programFile\\cost239_FinalResult.dat";
 	public static void main(String[] args) throws IOException {
-		String TopologyName = "D:/zyx/Topology/cost239.csv";
+		String TopologyName = "D:/zyx/Topology/6.csv";
 //		String TopologyName = "F:/zyx/Topology/cost239.csv";
-		int DemandNum=40;
+		int DemandNum=15;
 		int numOfTransponder = 0;
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -35,19 +35,19 @@ public class Mymain {
 		network_base.createNodepair();// 每个layer都生成节点对 产生节点对的时候会自动生成nodepair之间的demand
 		Layer iplayer_base = network_base.getLayerlist().get("Layer0");
 	
-		DemandRadom dr=new DemandRadom();
-		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
-		dr.TrafficNumRadom(RadomNodepairlist);
-		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-			file_io.filewrite2(FinalResultFile, np.getName());
-		}
-		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
-		}
+//		DemandRadom dr=new DemandRadom();
+//		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
+//		dr.TrafficNumRadom(RadomNodepairlist);
+//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+//			file_io.filewrite2(FinalResultFile, np.getName());
+//		}
+//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+//			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
+//		}
 		//以下可以读取表格中的业务
-//		ReadDemand rd=new ReadDemand();
+		ReadDemand rd=new ReadDemand();
 //		RadomNodepairlist=rd.readDemand(iplayer_base, "f:\\zyx\\USNETTraffic.csv");
-//		RadomNodepairlist=rd.readDemand(iplayer_base, "D:/cost239Traffic.csv");
+		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\ZYX\\6traffic.csv");
  
 		/*
 		 * 设置threshold循环
@@ -56,7 +56,7 @@ public class Mymain {
 			double bestResult=100000;
 			int bestshuffle=1000,NumOfIPreg=0,NumofOEOreg=0;
 			
-		for(int shuffle=0;shuffle<10;shuffle++){//打乱次序100次
+		for(int shuffle=0;shuffle<1;shuffle++){//打乱次序100次
 			double TotalWorkCost=0,TotalProCost=0;
 			file_io.filewrite2(OutFileName, " ");
 			file_io.filewrite2(FinalResultFile, " ");
@@ -65,7 +65,7 @@ public class Mymain {
 			file_io.filewrite2(OutFileName, "shuffle="+shuffle);
 			file_io.filewrite2(FinalResultFile, "shuffle="+shuffle);
 		
-			Collections.shuffle(RadomNodepairlist);//打乱产生的业务100次
+//			Collections.shuffle(RadomNodepairlist);//打乱产生的业务100次
 			for(NodePair nodepair: RadomNodepairlist){
 				file_io.filewrite2(FinalResultFile, "节点对  "+nodepair.getName()+"  流量：" + nodepair.getTrafficdemand());
 			}
@@ -552,7 +552,7 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,int numOf
 	// ip层工作路由不成功 在光层路由工作
 	if (!iproutingFlag) {
 		opWorkingGrooming opwg = new opWorkingGrooming();
-		opWorkRoute = opwg.opWorkingGrooming(nodepair, iplayer, oplayer, wprlist,rowList);
+		opWorkRoute = opwg.opWorkingGrooming(nodepair, iplayer, oplayer, wprlist,rowList,threshold);
 		if (opWorkRoute.getLinklist().size()!=0) {// 在光层成功建立工作路径后建立保护路径
 			ipProGrooming ipprog = new ipProGrooming();
 			ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, numOfTransponder,false, wprlist);

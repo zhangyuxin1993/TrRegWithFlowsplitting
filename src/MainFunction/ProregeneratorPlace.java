@@ -460,10 +460,9 @@ public class ProregeneratorPlace {
 				RemainRatio.setNumremainFlow((float) (slotnum * X - IPflow));
 //				System.out.println("建立通道的总容量 " + slotnum * X + "   业务容量 " + IPflow + "   剩余的容量比例 "
 //						+ RemainRatio.getRemainFlowRatio() + "   剩余的业务量：" + RemainRatio.getNumremainFlow());
-//				file_io.filewrite2(OutFileName,
-//						"建立通道的总容量 " + slotnum * X + "   业务容量 " + IPflow + "   剩余的容量比例 "
-//								+ RemainRatio.getRemainFlowRatio() + "   剩余的业务量：" + RemainRatio.getNumremainFlow()
-//								+ "  需要的FS数量：" + slotnum);
+				file_io.filewrite2(OutFileName,"建立通道的总容量 " + slotnum * X + "   业务容量 " + IPflow + "   剩余的容量比例 "
+								+ RemainRatio.getRemainFlowRatio() + "   剩余的业务量：" + RemainRatio.getNumremainFlow()
+								+ "  需要的FS数量：" + slotnum);
 			} else {
 				//System.out.println("频谱不够无法RSA");
 				file_io.filewrite2(OutFileName, "频谱不够无法RSA");
@@ -489,7 +488,8 @@ public class ProregeneratorPlace {
 		file_io.filewrite2(OutFileName, "对最终路径进行RSA：");
 		pt.setStartNode(finalRoute.getRoute().getNodelist().get(0));// 首先设置该链路的起始节点
 		pt.setMinRemainFlowRSA(10000);// 首先初始化
-
+		ArrayList<Double> ResFlowOnlinks=new ArrayList<Double>();
+		
 		finalRoute.getRoute().OutputRoute_node(finalRoute.getRoute());
 		int count = 0;
 		double length2 = 0;
@@ -521,12 +521,12 @@ public class ProregeneratorPlace {
 									if (reg.getNature() == 0) {// OEO再生器
 										Prolinkcapacitymodify(false, IPflow, length2, linklist2, oplayer, ipLayer,
 												provirtuallinklist, wprlist, nodepair, FSoneachLink, request,
-												sharereglist, pt);// 此时在n点放置再生器
+												sharereglist, pt,ResFlowOnlinks);// 此时在n点放置再生器
 										ProLengthList.add(length2);
 									} else if (reg.getNature() == 1) {
 										Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer,
 												provirtuallinklist, wprlist, nodepair, FSoneachLink, request,
-												sharereglist, pt);// 此时在n点放置再生器
+												sharereglist, pt,ResFlowOnlinks);// 此时在n点放置再生器
 										ProLengthList.add(length2);
 									}
 								}
@@ -534,11 +534,11 @@ public class ProregeneratorPlace {
 						} else {// 该再生器不是共享再生器
 							if (finalRoute.getIPRegnode().contains(count)) {// 新建的再生器是IP再生器
 								Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer,
-										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt);
+										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);
 								ProLengthList.add(length2);
 							} else {// 新建的再生器是纯OEO再生器
 								Prolinkcapacitymodify(false, IPflow, length2, linklist2, oplayer, ipLayer,
-										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt);
+										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);
 								ProLengthList.add(length2);
 							}
 						}
@@ -554,7 +554,7 @@ public class ProregeneratorPlace {
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一段链路的RSA
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));// 设置终止节点
 					Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer, provirtuallinklist,
-							wprlist, nodepair, FSoneachLink, request, sharereglist, pt);// 为目的节点前的剩余链路进行RSA
+							wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);// 为目的节点前的剩余链路进行RSA
 					ProLengthList.add(length2);
 					for (Link addlink : linklist2) {
 						alllinklist.add(addlink);
@@ -623,7 +623,7 @@ public class ProregeneratorPlace {
 	public boolean Prolinkcapacitymodify(Boolean IPorOEO, int IPflow, double routelength, ArrayList<Link> linklist,
 			Layer oplayer, Layer iplayer, ArrayList<VirtualLink> provirtuallinklist,
 			ArrayList<WorkandProtectRoute> wprlist, NodePair nodepair, ArrayList<FSshareOnlink> FSoneachLink,
-			Request request, ArrayList<Regenerator> sharereglist, ParameterTransfer pt) {
+			Request request, ArrayList<Regenerator> sharereglist, ParameterTransfer pt,ArrayList<Double> ResFlowOnlinks) {
 		// 建立虚拟链路 更改容量 RSA
 		double X = 1;
 		opProGrooming opg = new opProGrooming();
@@ -632,7 +632,8 @@ public class ProregeneratorPlace {
 		Node srcnode = new Node(null, 0, null, iplayer, 0, 0);
 		Node desnode = new Node(null, 0, null, iplayer, 0, 0);
 		file_out_put file_io = new file_out_put();
-
+		double resflow=0;
+		
 		if (routelength > 2000 && routelength <= 4000) {
 			X = 12.5;
 		} else if (routelength > 1000 && routelength <= 2000) {
@@ -643,9 +644,12 @@ public class ProregeneratorPlace {
 			X = 50.0;
 		}
 		slotnum = (int) Math.ceil(IPflow / X);// 向上取整
-	if(slotnum<Constant.MinSlotinLightpath){
+	     if(slotnum<Constant.MinSlotinLightpath){
 				slotnum=Constant.MinSlotinLightpath;
 			}
+	     resflow=slotnum*X-IPflow;
+	     ResFlowOnlinks.add(resflow);//存储由OEO再生器衔接的链路上剩余的流量
+	     
 		opworkflag = true;
 		double length1 = 0;
 		double cost = 0;
@@ -674,7 +678,7 @@ public class ProregeneratorPlace {
 			FSshareOnlink fsonLink = new FSshareOnlink(link, index_wave1);
 			FSoneachLink.add(fsonLink);
 		}
-
+		
 		// 以上链路频谱分配完毕 下面开始建立IP层光路
 		// 首先取出linklist里面的前两个链路和最后两个链路
 		if (IPorOEO) {
@@ -726,20 +730,30 @@ public class ProregeneratorPlace {
 
 			VirtualLink Vlink = new VirtualLink(srcnode.getName(), desnode.getName(), 1, 0);
 			if (!shareFlag || shareFS <= slotnum) {// 表示该linklist中有链路不能共享FS或者均可以共享时共享的FS小于需要的FS
+				double minflow=10000;
+				for(double resflow2:ResFlowOnlinks){//寻找不同链路上剩余流量最小的链路
+					if(minflow>resflow2){
+						minflow=resflow2;
+					}
+				}
+				ResFlowOnlinks.clear();
 				Vlink.setnature(1);
-				Vlink.setUsedcapacity(Vlink.getUsedcapacity() + IPflow);
-				Vlink.setFullcapacity(slotnum * X);// 多出来的flow是从这里产生的
-				Vlink.setRestcapacity(Vlink.getFullcapacity() - Vlink.getUsedcapacity());
+				Vlink.setRestcapacity(minflow);//这里只set剩余流量 不设置总流量
 				// Vlink.setlength(length1);
 				Vlink.setcost(cost);
 				Vlink.setPhysicallink(linklist);
 				provirtuallinklist.add(Vlink);
 			}
 			if (shareFS > slotnum) {// 表示该linklist中有链路不能共享FS或者均可以共享时共享的FS小于需要的FS
+				double minflow=10000;
+				for(double resflow2:ResFlowOnlinks){//寻找不同链路上剩余流量最小的链路
+					if(minflow>resflow2){
+						minflow=resflow2;
+					}
+				}
+				ResFlowOnlinks.clear();
 				Vlink.setnature(1);
-				Vlink.setUsedcapacity(Vlink.getUsedcapacity() + IPflow);
-				Vlink.setFullcapacity(shareFS * X);// 多出来的flow是从这里产生的
-				Vlink.setRestcapacity(Vlink.getFullcapacity() - Vlink.getUsedcapacity());
+				Vlink.setRestcapacity(minflow);
 				Vlink.setlength(length1);
 				Vlink.setcost(cost);
 				Vlink.setPhysicallink(linklist);

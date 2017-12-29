@@ -19,7 +19,8 @@ import subgraph.LinearRoute;
 public class opWorkingGrooming {
 	String OutFileName = Mymain.OutFileName;
 
-	public LinearRoute opWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,ArrayList<WorkandProtectRoute> wprlist, ArrayList<RequestOnWorkLink> rowList) throws IOException {
+	public LinearRoute opWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,ArrayList<WorkandProtectRoute> wprlist, ArrayList<RequestOnWorkLink> rowList
+			,float threshold) throws IOException {
 		RouteSearching Dijkstra = new RouteSearching();
 		boolean opworkflag = false;
 		Node srcnode = nodepair.getSrcNode();
@@ -184,7 +185,7 @@ public class opWorkingGrooming {
 				if (routelength > 4000) {
 					RegeneratorPlace regplace = new RegeneratorPlace();
 					opworkflag = regplace.regeneratorplace(IPflow, routelength, opnewRoute, oplayer, iplayer, wprlist,
-							nodepair, RegLengthList, rowList);
+							nodepair, RegLengthList, rowList,threshold);
 				}
 			}
 			if (opworkflag) {

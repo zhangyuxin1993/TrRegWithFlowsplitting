@@ -1,5 +1,7 @@
 package MainFunction;
 
+import java.util.ArrayList;
+
 import network.Node;
 
 /*
@@ -12,6 +14,14 @@ public class ParameterTransfer {
 	Node StartNode=new Node(null, 0, null, null, 0, 0);
 	Node EndNode=new Node(null, 0, null, null, 0, 0);
 	float MinRemainFlowRSA=0;  //在每条链路RSA时 记录每条链路上剩余的最小容量
+	ArrayList<Double> ResFlowOnlinks= new ArrayList<>();
+	
+	public void setResFlowOnlinks(ArrayList<Double> ResFlowOnlinks) {
+		this.ResFlowOnlinks.addAll(ResFlowOnlinks);
+	}
+	public ArrayList<Double> getResFlowOnlinks() {
+		return ResFlowOnlinks;
+	}
 	
 	public Node getEndNode() {
 		return EndNode;
