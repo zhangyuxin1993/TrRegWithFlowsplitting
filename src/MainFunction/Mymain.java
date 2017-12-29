@@ -17,14 +17,14 @@ import network.VirtualLink;
 import subgraph.LinearRoute;
 
 public class Mymain {
-	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\6.dat";
-	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\6_FinalResult.dat";
+	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\COST239.dat";
+	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\COST239_FinalResult.dat";
 //	public static String OutFileName = "F:\\zyx\\programFile\\cost239.dat";
 //	public static String FinalResultFile = "F:\\zyx\\programFile\\cost239_FinalResult.dat";
 	public static void main(String[] args) throws IOException {
-		String TopologyName = "D:/zyx/Topology/6.csv";
+		String TopologyName = "D:/zyx/Topology/COST239.csv";
 //		String TopologyName = "F:/zyx/Topology/cost239.csv";
-		int DemandNum=15;
+		int DemandNum=20;
 		int numOfTransponder = 0;
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -35,19 +35,19 @@ public class Mymain {
 		network_base.createNodepair();// 每个layer都生成节点对 产生节点对的时候会自动生成nodepair之间的demand
 		Layer iplayer_base = network_base.getLayerlist().get("Layer0");
 	
-//		DemandRadom dr=new DemandRadom();
-//		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
-//		dr.TrafficNumRadom(RadomNodepairlist);
-//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-//			file_io.filewrite2(FinalResultFile, np.getName());
-//		}
-//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-//			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
-//		}
+		DemandRadom dr=new DemandRadom();
+		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
+		dr.TrafficNumRadom(RadomNodepairlist);
+		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+			file_io.filewrite2(FinalResultFile, np.getName());
+		}
+		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
+		}
 		//以下可以读取表格中的业务
-		ReadDemand rd=new ReadDemand();
+//		ReadDemand rd=new ReadDemand();
 //		RadomNodepairlist=rd.readDemand(iplayer_base, "f:\\zyx\\USNETTraffic.csv");
-		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\ZYX\\6traffic.csv");
+//		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\ZYX\\6traffic.csv");
  
 		/*
 		 * 设置threshold循环
@@ -83,7 +83,8 @@ public class Mymain {
 			Layer oplayer = network.getLayerlist().get("Physical");
 		
 			mm.NodepairListset(iplayer, RadomNodepairlist);//在IP层设置nodepairList
-			ArrayList<NodePair> demandlist = mm.getDemandList(iplayer,RadomNodepairlist);
+			ArrayList< NodePair >demandlist=mm.Rankflow(iplayer);
+//			ArrayList<NodePair> demandlist = mm.getDemandList(iplayer,RadomNodepairlist);
 			
 			for (int n = 0; n < demandlist.size(); n++) {
 				NodePair nodepair = demandlist.get(n);

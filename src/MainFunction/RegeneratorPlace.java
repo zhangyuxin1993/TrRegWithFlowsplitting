@@ -334,6 +334,7 @@ public class RegeneratorPlace {
 			ArrayList<RequestOnWorkLink> rowList) {
 		// 这里需要将不同的再生器 构造不同的IP虚拟链路加入IP层
 		// IP再生器 两端需要加入两段虚拟链路 oeo再生器只需要加入一段虚拟链路
+		ArrayList<Link> phyLinklist=new ArrayList<>();
 		ParameterTransfer pt = new ParameterTransfer();
 		finalRoute.getRoute().OutputRoute_node(finalRoute.getRoute());
 		int count = 0;
@@ -367,7 +368,7 @@ public class RegeneratorPlace {
 						//System.out.println("起始节点为："+ pt.getStartNode().getName()+"终止节点为："+ pt.getEndNode().getName());
 							// 该点放置了IP再生器
 						if (finalRoute.getIPRegnode().contains(count)) {
-							modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt,  rowList,ResFlowOnlinks);
+							modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt,  rowList,ResFlowOnlinks,phyLinklist);
 							file_io.filewrite2(OutFileName, "本次RSA长度为：" + length2);
 							RegLengthList.add(length2);
 							length2 = 0;
@@ -376,7 +377,7 @@ public class RegeneratorPlace {
 						}
 						// 该点放置纯OEO再生器
 						else {
-							modifylinkcapacity(false, IPflow, length2, linklist2, oplayer, ipLayer, pt, rowList,ResFlowOnlinks);
+							modifylinkcapacity(false, IPflow, length2, linklist2, oplayer, ipLayer, pt, rowList,ResFlowOnlinks,phyLinklist);
 							RegLengthList.add(length2);
 							file_io.filewrite2(OutFileName, "本次RSA长度为：" + length2);
 							length2 = 0;
@@ -388,7 +389,7 @@ public class RegeneratorPlace {
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一个再生器和终点之间的RSA
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));//设置终止节点
 					//System.out.println("起始节点为："+ pt.getStartNode().getName()+"终止节点为："+ pt.getEndNode().getName());
-					modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt, rowList,ResFlowOnlinks);// 此时在n点放置再生器
+					modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt, rowList,ResFlowOnlinks,phyLinklist);// 此时在n点放置再生器
 					RegLengthList.add(length2);
 					file_io.filewrite2(OutFileName, "本次RSA长度为：" + length2);
 					linklist2.clear();
@@ -446,7 +447,7 @@ public class RegeneratorPlace {
 	}
 
 	public boolean modifylinkcapacity(Boolean IPorOEO, int IPflow, double routelength, ArrayList<Link> linklist,
-			Layer oplayer, Layer iplayer, ParameterTransfer pt,ArrayList<RequestOnWorkLink> rowList,ArrayList<Double> ResFlowOnlinks) {// true表示IP再生器
+			Layer oplayer, Layer iplayer, ParameterTransfer pt,ArrayList<RequestOnWorkLink> rowList,ArrayList<Double> ResFlowOnlinks,ArrayList<Link> phyLinklist) {// true表示IP再生器
 																	// false表示纯OEO再生器
 		double X = 1;
 		int slotnum = 0;
@@ -508,6 +509,7 @@ public class RegeneratorPlace {
 					row.setWorkLink(link);row.setWorkRequest(request);
 					row.setStartFS(index_wave.get(0)); row.setSlotNum(slotnum);
 					rowList.add(row);
+					phyLinklist.add(link);//记录建立的虚拟链路对应的物理链路
 //					System.out.println();
 //					System.out.println("链路 " + link.getName() + "的最大slot是： " + link.getMaxslot() + " 可用频谱窗数："
 //							+ link.getSlotsindex().size());
@@ -571,10 +573,9 @@ public class RegeneratorPlace {
 					VirtualLink Vlink = new VirtualLink(srcnode.getName(), desnode.getName(), 0, 0);
 					Vlink.setnature(0);
 					Vlink.setRestcapacity(minflow);
-					// Vlink.setlength(length1);
 					Vlink.setcost(cost);
-					Vlink.setPhysicallink(linklist);
-
+					Vlink.setPhysicallink(phyLinklist);
+					phyLinklist.clear();
 					
 					if (findflag) {// 如果在IP层中已经找到该链路
 						finlink.getVirtualLinkList().add(Vlink);

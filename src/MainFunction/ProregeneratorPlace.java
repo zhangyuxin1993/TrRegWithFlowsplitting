@@ -477,6 +477,7 @@ public class ProregeneratorPlace {
 			ArrayList<WorkandProtectRoute> wprlist, ArrayList<VirtualLink> provirtuallinklist,
 			ArrayList<Integer> ShareReg, ArrayList<Regenerator> sharereglist, Request request,ArrayList<Double> ProLengthList) {
 		// 对于最终路由 通过其再生器的类型 进行RSA（是否建立IP光路） 并且存储Wpr 中再生器的位置 类型
+		ArrayList<Link> phyLinklist=new ArrayList<>();
 		ParameterTransfer pt = new ParameterTransfer();
 		file_out_put file_io = new file_out_put();
 		ArrayList<Link> alllinklist = new ArrayList<>();
@@ -521,12 +522,12 @@ public class ProregeneratorPlace {
 									if (reg.getNature() == 0) {// OEO再生器
 										Prolinkcapacitymodify(false, IPflow, length2, linklist2, oplayer, ipLayer,
 												provirtuallinklist, wprlist, nodepair, FSoneachLink, request,
-												sharereglist, pt,ResFlowOnlinks);// 此时在n点放置再生器
+												sharereglist, pt,ResFlowOnlinks,phyLinklist);// 此时在n点放置再生器
 										ProLengthList.add(length2);
 									} else if (reg.getNature() == 1) {
 										Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer,
 												provirtuallinklist, wprlist, nodepair, FSoneachLink, request,
-												sharereglist, pt,ResFlowOnlinks);// 此时在n点放置再生器
+												sharereglist, pt,ResFlowOnlinks,phyLinklist);// 此时在n点放置再生器
 										ProLengthList.add(length2);
 									}
 								}
@@ -534,11 +535,11 @@ public class ProregeneratorPlace {
 						} else {// 该再生器不是共享再生器
 							if (finalRoute.getIPRegnode().contains(count)) {// 新建的再生器是IP再生器
 								Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer,
-										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);
+										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks,phyLinklist);
 								ProLengthList.add(length2);
 							} else {// 新建的再生器是纯OEO再生器
 								Prolinkcapacitymodify(false, IPflow, length2, linklist2, oplayer, ipLayer,
-										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);
+										provirtuallinklist, wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks,phyLinklist);
 								ProLengthList.add(length2);
 							}
 						}
@@ -554,7 +555,7 @@ public class ProregeneratorPlace {
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一段链路的RSA
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));// 设置终止节点
 					Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer, provirtuallinklist,
-							wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks);// 为目的节点前的剩余链路进行RSA
+							wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks, phyLinklist);// 为目的节点前的剩余链路进行RSA
 					ProLengthList.add(length2);
 					for (Link addlink : linklist2) {
 						alllinklist.add(addlink);
@@ -623,7 +624,8 @@ public class ProregeneratorPlace {
 	public boolean Prolinkcapacitymodify(Boolean IPorOEO, int IPflow, double routelength, ArrayList<Link> linklist,
 			Layer oplayer, Layer iplayer, ArrayList<VirtualLink> provirtuallinklist,
 			ArrayList<WorkandProtectRoute> wprlist, NodePair nodepair, ArrayList<FSshareOnlink> FSoneachLink,
-			Request request, ArrayList<Regenerator> sharereglist, ParameterTransfer pt,ArrayList<Double> ResFlowOnlinks) {
+			Request request, ArrayList<Regenerator> sharereglist, ParameterTransfer pt,ArrayList<Double> ResFlowOnlinks,
+			ArrayList<Link> phyLinklist) {
 		// 建立虚拟链路 更改容量 RSA
 		double X = 1;
 		opProGrooming opg = new opProGrooming();
@@ -677,6 +679,7 @@ public class ProregeneratorPlace {
 			file_io.filewrite2(OutFileName, " ");
 			FSshareOnlink fsonLink = new FSshareOnlink(link, index_wave1);
 			FSoneachLink.add(fsonLink);
+			phyLinklist.add(link);//记录建立的虚拟链路对应的物理链路
 		}
 		
 		// 以上链路频谱分配完毕 下面开始建立IP层光路
@@ -741,7 +744,8 @@ public class ProregeneratorPlace {
 				Vlink.setRestcapacity(minflow);//这里只set剩余流量 不设置总流量
 				// Vlink.setlength(length1);
 				Vlink.setcost(cost);
-				Vlink.setPhysicallink(linklist);
+				Vlink.setPhysicallink(phyLinklist);
+				phyLinklist.clear();
 				provirtuallinklist.add(Vlink);
 			}
 			if (shareFS > slotnum) {// 表示该linklist中有链路不能共享FS或者均可以共享时共享的FS小于需要的FS
@@ -756,7 +760,8 @@ public class ProregeneratorPlace {
 				Vlink.setRestcapacity(minflow);
 				Vlink.setlength(length1);
 				Vlink.setcost(cost);
-				Vlink.setPhysicallink(linklist);
+				Vlink.setPhysicallink(phyLinklist);
+				phyLinklist.clear();
 				provirtuallinklist.add(Vlink);
 			}
 			file_io.filewrite2(OutFileName, "");
