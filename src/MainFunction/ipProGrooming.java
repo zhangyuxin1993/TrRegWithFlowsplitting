@@ -16,7 +16,7 @@ import subgraph.LinearRoute;
 
 public class ipProGrooming {
 	String OutFileName =Mymain.OutFileName;
-	public boolean ipprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair,int numOfTransponder, boolean flag, ArrayList<WorkandProtectRoute> wprlist) throws IOException {// flag=true表示保护IP层建立的工作路径
+	public boolean ipprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair, boolean flag, ArrayList<WorkandProtectRoute> wprlist) throws IOException {// flag=true表示保护IP层建立的工作路径
 		Test t = new Test();
 		file_out_put file_io=new file_out_put();
 		

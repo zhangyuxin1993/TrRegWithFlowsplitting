@@ -21,7 +21,8 @@ public class RegeneratorPlace {
 	String OutFileName = Mymain.OutFileName;
 
 	public boolean regeneratorplace(int IPflow, double routelength, LinearRoute newRoute, Layer oplayer, Layer ipLayer,
-			ArrayList<WorkandProtectRoute> wprlist, NodePair nodepair,ArrayList<Double> RegLengthList,ArrayList<RequestOnWorkLink> rowList,float threshold) { // 注意最少再生器个数的计算
+			ArrayList<WorkandProtectRoute> wprlist, NodePair nodepair,ArrayList<Double> RegLengthList,ArrayList<RequestOnWorkLink> rowList,float threshold,
+			ParameterTransfer ptOftransp) { // 注意最少再生器个数的计算
 		// /*
 		// 第二种方法先判断一条路径最少使用的再生器的个数 然后穷尽所有的情况来选择再生器 放置的位置
 		file_out_put file_io = new file_out_put();
@@ -105,7 +106,7 @@ public class RegeneratorPlace {
 					
 					for (int k = 0; k < set.length; k++) {
 						setarray.add(set[k]);
-						if (RemainRatio.get(k) >= 2 || RemainRatio.get(k + 1) >= 2) {// 只要再生器前面或者后面有一段未充分使用则放置IP再生器
+						if (RemainRatio.get(k) >= threshold || RemainRatio.get(k + 1) >= threshold) {// 只要再生器前面或者后面有一段未充分使用则放置IP再生器
 							IPRegarray.add(set[k]);// 存储IP再生器放置节点
 						}
 					}
@@ -258,7 +259,7 @@ public class RegeneratorPlace {
 			}
 			nodepair.setFinalRoute(finalRoute);
 			RegeneratorPlace regp = new RegeneratorPlace();
-			regp.FinalRouteRSA(finalRoute, oplayer, ipLayer, IPflow,RegLengthList,  rowList);
+			regp.FinalRouteRSA(finalRoute, oplayer, ipLayer, IPflow,RegLengthList,  rowList,ptOftransp);
 		}
 
 		if (regplaceoption.size() == 0) {
@@ -331,11 +332,12 @@ public class RegeneratorPlace {
 	}
 
 	public void FinalRouteRSA(RouteAndRegPlace finalRoute, Layer oplayer, Layer ipLayer, int IPflow,ArrayList<Double>RegLengthList,
-			ArrayList<RequestOnWorkLink> rowList) {
+			ArrayList<RequestOnWorkLink> rowList,ParameterTransfer ptOftransp) {
 		// 这里需要将不同的再生器 构造不同的IP虚拟链路加入IP层
 		// IP再生器 两端需要加入两段虚拟链路 oeo再生器只需要加入一段虚拟链路
 		ArrayList<Link> phyLinklist=new ArrayList<>();
 		ParameterTransfer pt = new ParameterTransfer();
+		RegeneratorPlace rp=new RegeneratorPlace();
 		finalRoute.getRoute().OutputRoute_node(finalRoute.getRoute());
 		int count = 0;
 		double length2 = 0;
@@ -363,11 +365,17 @@ public class RegeneratorPlace {
 				count = count + 1;
 				if (!regflag2) {// 未到达最后一段路径的RSA
 					if (count == finalRoute.getregnode().get(i)) {// 首先该点放置了再生器
-					
 						pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));//设置终止节点
-						//System.out.println("起始节点为："+ pt.getStartNode().getName()+"终止节点为："+ pt.getEndNode().getName());
-							// 该点放置了IP再生器
+								if(count==1){//此时为transponder的发出链路
+								double costOfStart=rp.transpCostCal( length2 );
+								ptOftransp.setcost_of_tranp(ptOftransp.getcost_of_tranp()+costOfStart);
+								file_io.filewrite2(OutFileName, "transponder起点cost" + costOfStart+
+										"   此时transponder cost=" + ptOftransp.getcost_of_tranp());
+							}
+								// 该点放置了IP再生器
 						if (finalRoute.getIPRegnode().contains(count)) {
+							//这里用count计算transponder的cost
+						
 							modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt,  rowList,ResFlowOnlinks,phyLinklist);
 							file_io.filewrite2(OutFileName, "本次RSA长度为：" + length2);
 							RegLengthList.add(length2);
@@ -387,8 +395,11 @@ public class RegeneratorPlace {
 					}
 				}
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一个再生器和终点之间的RSA
+					double costOfEnd=rp.transpCostCal( length2 );
+					ptOftransp.setcost_of_tranp(ptOftransp.getcost_of_tranp()+costOfEnd);
+					file_io.filewrite2(OutFileName, "transponder终点cost" + costOfEnd+
+							"   此时transponder cost=" + ptOftransp.getcost_of_tranp());
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));//设置终止节点
-					//System.out.println("起始节点为："+ pt.getStartNode().getName()+"终止节点为："+ pt.getEndNode().getName());
 					modifylinkcapacity(true, IPflow, length2, linklist2, oplayer, ipLayer, pt, rowList,ResFlowOnlinks,phyLinklist);// 此时在n点放置再生器
 					RegLengthList.add(length2);
 					file_io.filewrite2(OutFileName, "本次RSA长度为：" + length2);
@@ -598,4 +609,17 @@ public class RegeneratorPlace {
 		return opworkflag;
 	}
 
+public double transpCostCal(double routelength) {
+	double costOftransp=0;
+	if (routelength > 2000 && routelength <= 4000) {
+		costOftransp=Constant.Cost_IP_reg_BPSK;
+	} else if (routelength > 1000 && routelength <= 2000) {
+		costOftransp=Constant.Cost_IP_reg_QPSK;
+	} else if (routelength > 500 && routelength <= 1000) {
+		costOftransp=Constant.Cost_IP_reg_8QAM;
+	} else if (routelength > 0 && routelength <= 500) {
+		costOftransp=Constant.Cost_IP_reg_16QAM;
+	}
+	return costOftransp;
+}
 }

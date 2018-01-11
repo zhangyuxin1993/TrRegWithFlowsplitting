@@ -22,7 +22,7 @@ public class opProGrooming {// 光层路由保护
 	String OutFileName = Mymain.OutFileName;
 
 	public boolean opprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair, LinearRoute route,
-			int numOfTransponder, boolean flag, ArrayList<WorkandProtectRoute> wprlist, float threshold,
+			ParameterTransfer ptoftransp, boolean flag, ArrayList<WorkandProtectRoute> wprlist, float threshold,
 			ArrayList<RequestOnWorkLink> rowList, ArrayList<FlowUseOnLink> FlowUseList) throws IOException {// flag=true表示保护IP层建立的工作路径
 		// flag=flase表示光层建立的工作路径
 		RouteSearching Dijkstra = new RouteSearching();
@@ -142,16 +142,24 @@ public class opProGrooming {// 光层路由保护
 				// System.out.println("物理路径的长度是："+routelength);
 				// 通过路径的长度来变化调制格式
 				if (routelength <= 4000) {
+					double costOftransp=0;
 					if (routelength > 2000 && routelength <= 4000) {
+						costOftransp=Constant.Cost_IP_reg_BPSK;
 						X = 12.5;
 					} else if (routelength > 1000 && routelength <= 2000) {
+						costOftransp=Constant.Cost_IP_reg_QPSK;
 						X = 25.0;
 					} else if (routelength > 500 && routelength <= 1000) {
+						costOftransp=Constant.Cost_IP_reg_8QAM;
 						X = 37.5;
 					} else if (routelength > 0 && routelength <= 500) {
+						costOftransp=Constant.Cost_IP_reg_16QAM;
 						X = 50.0;
 					}
 					slotnum = (int) Math.ceil(IPflow / X);// 向上取整
+					ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOftransp*2);
+					file_io.filewrite2(OutFileName, "保护路径不需要再生器时 cost of transponder" + costOftransp*2
+							+"此时的total cost="+ ptoftransp.getcost_of_tranp());
 					if (slotnum < Constant.MinSlotinLightpath) {
 						slotnum = Constant.MinSlotinLightpath;
 					}
@@ -218,7 +226,7 @@ public class opProGrooming {// 光层路由保护
 						Vlink.setRestcapacity(Vlink.getFullcapacity() - Vlink.getUsedcapacity());
 						Vlink.setPhysicallink(opPrtectRoute.getLinklist());
 						provirtuallinklist.add(Vlink);
-						// numOfTransponder = numOfTransponder + 2;
+						
 
 						if (findflag) {// 如果在IP层中已经找到该链路
 							file_io.filewrite2(OutFileName, "虚拟链路条数：" + finlink.getVirtualLinkList().size());
@@ -243,7 +251,7 @@ public class opProGrooming {// 光层路由保护
 				if (routelength > 4000) {
 					ProregeneratorPlace rgp = new ProregeneratorPlace();
 					success = rgp.ProRegeneratorPlace(nodepair, opPrtectRoute, wprlist, routelength, oplayer, iplayer,
-							IPflow, request, ProLengthList, threshold);
+							IPflow, request, ProLengthList, threshold, ptoftransp);
 				}
 			}
 
@@ -263,6 +271,7 @@ public class opProGrooming {// 光层路由保护
 				}
 			}
 			if (success) {
+				 ptoftransp.setNumOfTransponder(ptoftransp.getNumOfTransponder()+2);//保护光路建立成功
 				file_io.filewrite2(OutFileName, "保护路径已成功建立");
 				break;
 			}

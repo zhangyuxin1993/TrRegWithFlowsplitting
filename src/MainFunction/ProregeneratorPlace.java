@@ -22,7 +22,8 @@ public class ProregeneratorPlace {
 
 	// 在RSAunderSet 里面控制阈值
 	public boolean ProRegeneratorPlace(NodePair nodepair, LinearRoute newRoute, ArrayList<WorkandProtectRoute> wprlist,
-			double routelength, Layer oplayer, Layer ipLayer, int IPflow, Request request,ArrayList<Double> ProLengthList,float threshold) throws IOException {
+			double routelength, Layer oplayer, Layer ipLayer, int IPflow, Request request,ArrayList<Double> ProLengthList,float threshold,
+			ParameterTransfer ptoftransp) throws IOException {
 		WorkandProtectRoute nowdemand = new WorkandProtectRoute(null);
 		ArrayList<VirtualLink> provirtuallinklist = new ArrayList<>();
 		ProregeneratorPlace rgp2 = new ProregeneratorPlace();
@@ -303,7 +304,7 @@ public class ProregeneratorPlace {
 				finalRoute = regplaceoption.get(0);
 			// 接下来对该最终链路进行RSA
 			rgp2.FinalRouteRSA(nodepair, finalRoute, oplayer, ipLayer, IPflow, wprlist, provirtuallinklist, ShareReg,
-					sharereglist, request,ProLengthList);
+					sharereglist, request,ProLengthList,ptoftransp);
 			// 对于finalroute进行再生器节点存储！！
 		}
 		if (regplaceoption.size() == 0) {
@@ -475,17 +476,17 @@ public class ProregeneratorPlace {
 
 	public void FinalRouteRSA(NodePair nodepair, RouteAndRegPlace finalRoute, Layer oplayer, Layer ipLayer, int IPflow,
 			ArrayList<WorkandProtectRoute> wprlist, ArrayList<VirtualLink> provirtuallinklist,
-			ArrayList<Integer> ShareReg, ArrayList<Regenerator> sharereglist, Request request,ArrayList<Double> ProLengthList) {
+			ArrayList<Integer> ShareReg, ArrayList<Regenerator> sharereglist, Request request,ArrayList<Double> ProLengthList,
+			ParameterTransfer ptoftransp) {
 		// 对于最终路由 通过其再生器的类型 进行RSA（是否建立IP光路） 并且存储Wpr 中再生器的位置 类型
 		ArrayList<Link> phyLinklist=new ArrayList<>();
 		ParameterTransfer pt = new ParameterTransfer();
+		RegeneratorPlace rp=new RegeneratorPlace();
 		file_out_put file_io = new file_out_put();
 		ArrayList<Link> alllinklist = new ArrayList<>();
 		ArrayList<Regenerator> regthinglist = new ArrayList<>();
 		Test t = new Test();
 		file_io.filewrite2(OutFileName, "");
-		//System.out.println("");
-		//System.out.println("对最终路径进行RSA：");
 		file_io.filewrite2(OutFileName, "对最终路径进行RSA：");
 		pt.setStartNode(finalRoute.getRoute().getNodelist().get(0));// 首先设置该链路的起始节点
 		pt.setMinRemainFlowRSA(10000);// 首先初始化
@@ -513,6 +514,12 @@ public class ProregeneratorPlace {
 				count = count + 1;
 				if (!regflag2) {// 未到达最后一段路径的RSA
 					if (count == finalRoute.getregnode().get(i)) {
+						if(count==1){//此时为transponder的发出链路
+							double costOfStart=rp.transpCostCal( length2 );
+							ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOfStart);
+							file_io.filewrite2(OutFileName, "保护transponder起点cost" + costOfStart+
+									"   此时transponder cost=" + ptoftransp.getcost_of_tranp());
+						}
 						pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));// 设置终止节点
 
 						if (ShareReg.contains(count)) {// 先判断该再生器是否是共享的
@@ -553,6 +560,11 @@ public class ProregeneratorPlace {
 					}
 				}
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一段链路的RSA
+						double costOfEnd=rp.transpCostCal( length2 );
+						ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOfEnd);
+						file_io.filewrite2(OutFileName, "保护transponder终点cost" + costOfEnd+
+								"   totaltransponder cost=" + ptoftransp.getcost_of_tranp());
+					 
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));// 设置终止节点
 					Prolinkcapacitymodify(true, IPflow, length2, linklist2, oplayer, ipLayer, provirtuallinklist,
 							wprlist, nodepair, FSoneachLink, request, sharereglist, pt,ResFlowOnlinks, phyLinklist);// 为目的节点前的剩余链路进行RSA

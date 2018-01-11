@@ -20,7 +20,7 @@ public class opWorkingGrooming {
 	String OutFileName = Mymain.OutFileName;
 
 	public LinearRoute opWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,ArrayList<WorkandProtectRoute> wprlist, ArrayList<RequestOnWorkLink> rowList
-			,float threshold) throws IOException {
+			,float threshold,ParameterTransfer ptoftransp) throws IOException {
 		RouteSearching Dijkstra = new RouteSearching();
 		boolean opworkflag = false;
 		Node srcnode = nodepair.getSrcNode();
@@ -69,17 +69,26 @@ public class opWorkingGrooming {
 				// 通过路径的长度来变化调制格式 并且判断再生器 的使用
 
 				if (routelength < 4000) {// 找到的路径不需要再生器就可以直接使用
+					double costOftransp=0;
 					if (routelength > 2000 && routelength <= 4000) {
+						costOftransp=Constant.Cost_IP_reg_BPSK;
 						X = 12.5;
 					} else if (routelength > 1000 && routelength <= 2000) {
+						costOftransp=Constant.Cost_IP_reg_QPSK;
 						X = 25.0;
 					} else if (routelength > 500 && routelength <= 1000) {
+						costOftransp=Constant.Cost_IP_reg_8QAM;
 						X = 37.5;
 					} else if (routelength > 0 && routelength <= 500) {
+						costOftransp=Constant.Cost_IP_reg_16QAM;
 						X = 50.0;
 					}
 					slotnum = (int) Math.ceil(IPflow / X);// 向上取整
-
+					ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOftransp*2);
+					file_io.filewrite2(OutFileName, "");
+					file_io.filewrite2(OutFileName, "工作路径不需要再生器时 cost of transponder" + costOftransp*2
+							+"transponder cost="+ ptoftransp.getcost_of_tranp());
+					
 					if (slotnum < Constant.MinSlotinLightpath) {
 						slotnum = Constant.MinSlotinLightpath;
 					}
@@ -124,7 +133,6 @@ public class opWorkingGrooming {
 						Link finlink = iplayer.findLink(srcnode, desnode);
 						Link createlink = new Link(null, 0, null, iplayer, null, null, 0, 0);
 						boolean findflag = false;
-						// System.out.println();
 						try {
 							System.out.println("IP层中找到工作链路" + finlink.getName());
 							file_io.filewrite2(OutFileName, "IP层中找到工作链路" + finlink.getName());
@@ -147,51 +155,33 @@ public class opWorkingGrooming {
 
 						if (findflag) {// 如果在IP层中已经找到该链路
 							finlink.getVirtualLinkList().add(Vlink);
-							// System.out.println("IP层已存在的链路 " +
-							// finlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
-							// + Vlink.getUsedcapacity() + "\n"+"共有的flow: " +
-							// Vlink.getFullcapacity()
-							// + " 预留的flow： " + Vlink.getRestcapacity());
 							file_io.filewrite2(OutFileName,
 									"IP层已存在的链路 " + finlink.getName() + " 加入新的保护虚拟链路 上面的已用flow: "
 											+ Vlink.getUsedcapacity() + "\n" + "共有的flow:  " + Vlink.getFullcapacity()
 											+ "    预留的flow：  " + Vlink.getRestcapacity());
-							// System.out.println("工作链路在光层新建的链路：
-							// "+finlink.getName()+" 上的虚拟链路条数： "+
-							// finlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "工作链路在光层新建的链路：  " + finlink.getName() + "  上的虚拟链路条数： "
 									+ finlink.getVirtualLinkList().size());
 						} else {
 							createlink.getVirtualLinkList().add(Vlink);
-							// System.out.println("IP层上新建链路 " +
-							// createlink.getName() + " 加入新的工作虚拟链路 上面的已用flow: "
-							// + Vlink.getUsedcapacity() + "\n"+"共有的flow: " +
-							// Vlink.getFullcapacity()
-							// + " 预留的flow： " + Vlink.getRestcapacity());
 							file_io.filewrite2(OutFileName,
 									"IP层上新建链路 " + createlink.getName() + " 加入新的工作虚拟链路 上面的已用flow: "
 											+ Vlink.getUsedcapacity() + "\n" + "共有的flow:  " + Vlink.getFullcapacity()
 											+ "    预留的flow：  " + Vlink.getRestcapacity());
-							// System.out.println("*********工作链路在光层新建的链路：
-							// "+createlink.getName()+" 上的虚拟链路条数： "+
-							// createlink.getVirtualLinkList().size());
 							file_io.filewrite2(OutFileName, "*********工作链路在光层新建的链路：  " + createlink.getName()
 									+ "  上的虚拟链路条数： " + createlink.getVirtualLinkList().size());
 						}
-						// numOfTransponder = numOfTransponder + 2;
+						
 					}
 				}
 
 				if (routelength > 4000) {
 					RegeneratorPlace regplace = new RegeneratorPlace();
 					opworkflag = regplace.regeneratorplace(IPflow, routelength, opnewRoute, oplayer, iplayer, wprlist,
-							nodepair, RegLengthList, rowList,threshold);
+							nodepair, RegLengthList, rowList,threshold,ptoftransp);
 				}
 			}
 			if (opworkflag) {
-				// &&routelength<=4000) {
-				// System.out.println();
-				// System.out.println("工作路径在光层成功路由并且RSA");
+				ptoftransp.setNumOfTransponder(ptoftransp.getNumOfTransponder()+2);//工作光路建立成功
 				file_io.filewrite2(OutFileName, "工作路径在光层成功路由并且RSA");
 				WorkandProtectRoute wpr = new WorkandProtectRoute(nodepair);
 				Request re = new Request(nodepair);
@@ -205,7 +195,6 @@ public class opWorkingGrooming {
 
 			}
 			if (!opworkflag) {
-				// System.out.println("工作路由光层路由失败 该业务阻塞");
 				file_io.filewrite2(OutFileName, "保护路径在光层无法建立");
 			}
 		}

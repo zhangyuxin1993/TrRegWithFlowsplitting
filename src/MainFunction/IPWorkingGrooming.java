@@ -18,7 +18,7 @@ import subgraph.LinearRoute;
 
 public class IPWorkingGrooming {
 	String OutFileName =Mymain.OutFileName;
-	public boolean ipWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer,int numOfTransponder, ArrayList<WorkandProtectRoute> wprlist,ArrayList<FlowUseOnLink> FlowUseList) throws IOException {
+	public boolean ipWorkingGrooming(NodePair nodepair, Layer iplayer, Layer oplayer, ArrayList<WorkandProtectRoute> wprlist,ArrayList<FlowUseOnLink> FlowUseList) throws IOException {
 //		boolean routeFlag=false;
 		file_out_put file_io=new file_out_put();
 		ArrayList<VirtualLink> DelVirtualLinklist = new ArrayList<VirtualLink>();

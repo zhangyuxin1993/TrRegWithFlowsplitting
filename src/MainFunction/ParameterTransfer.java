@@ -15,6 +15,23 @@ public class ParameterTransfer {
 	Node EndNode=new Node(null, 0, null, null, 0, 0);
 	float MinRemainFlowRSA=0;  //在每条链路RSA时 记录每条链路上剩余的最小容量
 	ArrayList<Double> ResFlowOnlinks= new ArrayList<>();
+	int numOfTransponder=0;
+	double cost_of_tranp=0;
+	
+	public double getcost_of_tranp() {
+		return cost_of_tranp;
+	}
+	public void setcost_of_tranp(double  cost_of_tranp) {
+		 this.cost_of_tranp=cost_of_tranp;
+	}
+	
+	public int getNumOfTransponder() {
+		return numOfTransponder;
+	}
+	public void setNumOfTransponder(int  numOfTransponder) {
+		 this.numOfTransponder=numOfTransponder;
+	}
+	
 	
 	public void setResFlowOnlinks(ArrayList<Double> ResFlowOnlinks) {
 		this.ResFlowOnlinks.addAll(ResFlowOnlinks);
