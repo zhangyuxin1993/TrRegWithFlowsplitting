@@ -446,7 +446,7 @@ public class opProGrooming {// 光层路由保护
 			for (WorkandProtectRoute wpr : wprlist) {
 				if (shareslotWPR.keySet().contains(wpr)) {
 					if (shareslotWPR.get(wpr).size() != 0) {
-						file_io.filewrite_without(OutFileName, "链路 " + link.getName() + " 上可以共享的slot为 ");
+//						file_io.filewrite_without(OutFileName, "链路 " + link.getName() + " 上可以共享的slot为 ");
 						// System.out.print("链路 " + link.getName() + "
 						// 上可以共享的slot为 ");
 						for (int release : shareslotWPR.get(wpr)) {// 释放可共享资源
@@ -476,10 +476,10 @@ public class opProGrooming {// 光层路由保护
 							// link.getSlotsarray().get(release).getoccupiedreqlist().remove(res);
 							link.getSlotsarray().get(release).getoccupiedreqlist().remove(request);
 							// test
-							file_io.filewrite_without(OutFileName, release + "  ");
+//							file_io.filewrite_without(OutFileName, release + "  ");
 							// System.out.print(release + " ");
 						}
-						file_io.filewrite2(OutFileName, " ");
+//						file_io.filewrite2(OutFileName, " ");
 					}
 				}
 			}

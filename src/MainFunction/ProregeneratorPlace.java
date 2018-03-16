@@ -514,7 +514,7 @@ public class ProregeneratorPlace {
 				count = count + 1;
 				if (!regflag2) {// 未到达最后一段路径的RSA
 					if (count == finalRoute.getregnode().get(i)) {
-						if(count==1){//此时为transponder的发出链路
+						if(count==finalRoute.getregnode().get(0)){//此时为transponder的发出链路
 							double costOfStart=rp.transpCostCal( length2 );
 							ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOfStart);
 							file_io.filewrite2(OutFileName, "保护transponder起点cost" + costOfStart+
