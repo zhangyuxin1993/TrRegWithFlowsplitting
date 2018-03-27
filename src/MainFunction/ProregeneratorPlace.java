@@ -318,7 +318,7 @@ public class ProregeneratorPlace {
 			for (WorkandProtectRoute wpr : wprlist) {
 				if (wpr.getdemand().equals(nodepair)) {
 					wpr.setrequest(request);
-					//System.out.println(wpr.getRegeneratorlist().size());
+					wpr.setcostoftransForSingle(ptoftransp.getcostOftransForsingle());
 					file_io.filewrite(OutFileName, wpr.getRegeneratorlist().size());
 				}
 			}
@@ -517,6 +517,7 @@ public class ProregeneratorPlace {
 						if(count==finalRoute.getregnode().get(0)){//此时为transponder的发出链路
 							double costOfStart=rp.transpCostCal( length2 );
 							ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOfStart);
+							ptoftransp.setcostOftransForsingle(ptoftransp.getcostOftransForsingle()+costOfStart);
 							file_io.filewrite2(OutFileName, "保护transponder起点cost" + costOfStart+
 									"   此时transponder cost=" + ptoftransp.getcost_of_tranp());
 						}
@@ -562,6 +563,7 @@ public class ProregeneratorPlace {
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一段链路的RSA
 						double costOfEnd=rp.transpCostCal( length2 );
 						ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOfEnd);
+						ptoftransp.setcostOftransForsingle(ptoftransp.getcostOftransForsingle()+costOfEnd);
 						file_io.filewrite2(OutFileName, "保护transponder终点cost" + costOfEnd+
 								"   totaltransponder cost=" + ptoftransp.getcost_of_tranp());
 					 
@@ -814,7 +816,7 @@ public class ProregeneratorPlace {
 
 			for (int standard = 0; standard < regplaceoption.size() - 1; standard++) {// 标准
 				RouteAndRegPlace StandardRoute = regplaceoption.get(standard);
-				int StandardIP = 0, CompareIP = 0;
+				int StandardShareIP = 0, CompareShareIP = 0;
 				if (RemoveRoute.contains(StandardRoute))
 					continue;
 
@@ -823,38 +825,43 @@ public class ProregeneratorPlace {
 					if (RemoveRoute.contains(CompareRoute))
 						continue;
 
+					if(StandardRoute.getNewRegList().size()>CompareRoute.getNewRegList().size()){//要选择新建再生器少的链路
+						RemoveRoute.add(StandardRoute);
+						break;
+					}
+					else if(StandardRoute.getNewRegList().size()<CompareRoute.getNewRegList().size()){
+						RemoveRoute.add(CompareRoute);// 比较的没有标准好
+						continue;
+					}
+					if(StandardRoute.getIPRegnode().size()>CompareRoute.getIPRegnode().size()){
+						RemoveRoute.add(StandardRoute);
+						break;
+					}
+					else if(StandardRoute.getIPRegnode().size()<CompareRoute.getIPRegnode().size()){
+						RemoveRoute.add(CompareRoute);// 比较的没有标准好
+						continue;
+					}
+					
+					
+					//以上比较了新建再生器 接下来比较共享再生器
 					for (Regenerator shareReg : StandardRoute.getUsedShareReg()) {
 						if (shareReg.getNature() == 1)
-							StandardIP++;
+							StandardShareIP++;
 					}
-//					System.out.print("第一层筛选 标准路由共享的IP再生器个数为 ：");
-//					file_io.filewrite2(OutFileName, "第一层筛选 标准路由共享的IP再生器个数为 ："+StandardIP);
-//					System.out.println(StandardIP);
+//					 file_io.filewrite2(OutFileName, "第一层筛选 标准路由共享的IP再生器个数为："+StandardShareIP);
 					for (Regenerator shareReg : CompareRoute.getUsedShareReg()) {
 						if (shareReg.getNature() == 1)
-							CompareIP++;
+							CompareShareIP++;
 					}
-//					System.out.print("第一层筛选 比较路由共享的IP再生器个数为：");
-//					System.out.println(CompareIP);
-//					file_io.filewrite2(OutFileName, "第一层筛选 比较路由共享的IP再生器个数为："+CompareIP);
-					if (StandardRoute.getNewRegList().size() == 0) {// 再生器全是靠共享得到的
-																	// 则此时优先选用IP再生器多的路径
-						if (StandardIP < CompareIP) {
-							RemoveRoute.add(StandardRoute);// 删去共享IP再生器少的路径
-							break;
-						}
-						if (StandardIP > CompareIP) {
-							RemoveRoute.add(CompareRoute);// 比较的没有标准好
-						}
-					} else {// 有新建的再生器 说明共享再生器全部使用 此时不需要判断共享再生器的选取
-						// 在新建的再生器中使用OEO再生器多的路径
-						if (StandardIP > CompareIP) {
-							RemoveRoute.add(StandardRoute);// 删去新建IP再生器多的路径
-							break;
-						}
-						if (StandardIP < CompareIP) {
-							RemoveRoute.add(CompareRoute);// 比较的没有标准好
-						}
+//					 file_io.filewrite2(OutFileName, "第一层筛选比较路由共享的IP再生器个数为："+CompareShareIP);
+				
+					if (StandardShareIP < CompareShareIP) {
+						RemoveRoute.add(StandardRoute);// 删去共享IP再生器少的路径
+						break;
+					}
+					else if (StandardShareIP > CompareShareIP) {
+						RemoveRoute.add(CompareRoute);// 比较的没有标准好
+						continue;
 					}
 				}
 			}
@@ -870,15 +877,11 @@ public class ProregeneratorPlace {
 					RouteAndRegPlace StandardRoute_2 = regplaceoption.get(standard);
 					if (RemoveRoute.contains(StandardRoute_2))
 						continue;
-//					System.out.print("第二层筛选 标准路由剩余流量为：");
-//					System.out.println(StandardRoute_2.getNumRemainFlow());
 //					file_io.filewrite2(OutFileName, "第二层筛选 标准路由剩余流量："+StandardRoute_2.getNumRemainFlow());
 					for (int k = standard + 1; k < regplaceoption.size(); k++) {
 						RouteAndRegPlace CompareRoute_2 = regplaceoption.get(k);
 						if (RemoveRoute.contains(CompareRoute_2))
 							continue;
-//						System.out.print("第二层筛选 比较路由剩余流量为：");
-//						System.out.println(CompareRoute_2.getNumRemainFlow());
 //						file_io.filewrite2(OutFileName, "第二层筛选 比较路由剩余流量："+CompareRoute_2.getNumRemainFlow());
 						if (StandardRoute_2.getNumRemainFlow() < CompareRoute_2.getNumRemainFlow()) {
 							RemoveRoute.add(StandardRoute_2);// 删去剩余流量少的路由

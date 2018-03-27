@@ -17,6 +17,14 @@ public class ParameterTransfer {
 	ArrayList<Double> ResFlowOnlinks= new ArrayList<>();
 	int numOfTransponder=0;
 	double cost_of_tranp=0;
+	double costOftransForsingle=0;
+
+	public double getcostOftransForsingle() {
+		return costOftransForsingle;
+	}
+	public void setcostOftransForsingle(double  costOftransForsingle) {
+		 this.costOftransForsingle=costOftransForsingle;
+	}
 	
 	public double getcost_of_tranp() {
 		return cost_of_tranp;

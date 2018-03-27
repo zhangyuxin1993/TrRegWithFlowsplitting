@@ -85,6 +85,8 @@ public class opWorkingGrooming {
 					}
 					slotnum = (int) Math.ceil(IPflow / X);// 向上取整
 					ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOftransp*2);
+					ptoftransp.setcostOftransForsingle(ptoftransp.getcostOftransForsingle()+costOftransp*2);
+					
 					file_io.filewrite2(OutFileName, "");
 					file_io.filewrite2(OutFileName, "工作路径不需要再生器时 cost of transponder" + costOftransp*2
 							+"transponder cost="+ ptoftransp.getcost_of_tranp());

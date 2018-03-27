@@ -366,9 +366,10 @@ public class RegeneratorPlace {
 				if (!regflag2) {// 未到达最后一段路径的RSA
 					if (count == finalRoute.getregnode().get(i)) {// 首先该点放置了再生器
 						pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));//设置终止节点
-								if(count==1){//此时为transponder的发出链路
+								if(count==finalRoute.getregnode().get(0)){//此时为transponder的发出链路
 								double costOfStart=rp.transpCostCal( length2 );
 								ptOftransp.setcost_of_tranp(ptOftransp.getcost_of_tranp()+costOfStart);
+								ptOftransp.setcostOftransForsingle(ptOftransp.getcostOftransForsingle()+costOfStart);
 								file_io.filewrite2(OutFileName, "transponder起点cost" + costOfStart+
 										"   此时transponder cost=" + ptOftransp.getcost_of_tranp());
 							}
@@ -397,6 +398,7 @@ public class RegeneratorPlace {
 				if (count == finalRoute.getRoute().getNodelist().size() - 1) {// 最后一个再生器和终点之间的RSA
 					double costOfEnd=rp.transpCostCal( length2 );
 					ptOftransp.setcost_of_tranp(ptOftransp.getcost_of_tranp()+costOfEnd);
+					ptOftransp.setcostOftransForsingle(ptOftransp.getcostOftransForsingle()+costOfEnd);
 					file_io.filewrite2(OutFileName, "transponder终点cost" + costOfEnd+
 							"   此时transponder cost=" + ptOftransp.getcost_of_tranp());
 					pt.setEndNode(finalRoute.getRoute().getNodelist().get(count));//设置终止节点

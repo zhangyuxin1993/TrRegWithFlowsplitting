@@ -158,6 +158,8 @@ public class opProGrooming {// 光层路由保护
 					}
 					slotnum = (int) Math.ceil(IPflow / X);// 向上取整
 					ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOftransp*2);
+					ptoftransp.setcostOftransForsingle(ptoftransp.getcostOftransForsingle()+costOftransp*2);
+					
 					file_io.filewrite2(OutFileName, "保护路径不需要再生器时 cost of transponder" + costOftransp*2
 							+"此时的total cost="+ ptoftransp.getcost_of_tranp());
 					if (slotnum < Constant.MinSlotinLightpath) {
@@ -265,6 +267,7 @@ public class opProGrooming {// 光层路由保护
 						wpr.setprolinklist(totallink);
 						wpr.setproroute(opPrtectRoute);
 						wpr.setFSoneachLink(FSuseOnlink);
+						wpr.setcostoftransForSingle(ptoftransp.getcostOftransForsingle());
 						wpr.setprovirtuallinklist(provirtuallinklist);
 						wpr.setregthinglist(null);
 					}
