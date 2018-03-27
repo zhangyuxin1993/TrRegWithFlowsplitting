@@ -158,6 +158,8 @@ public class opProGrooming {// 光层路由保护
 					}
 					slotnum = (int) Math.ceil(IPflow / X);// 向上取整
 					ptoftransp.setcost_of_tranp(ptoftransp.getcost_of_tranp()+costOftransp*2);
+					ptoftransp.setcostOftransForsingle(ptoftransp.getcostOftransForsingle()+costOftransp*2);
+					
 					file_io.filewrite2(OutFileName, "保护路径不需要再生器时 cost of transponder" + costOftransp*2
 							+"此时的total cost="+ ptoftransp.getcost_of_tranp());
 					if (slotnum < Constant.MinSlotinLightpath) {
@@ -265,6 +267,7 @@ public class opProGrooming {// 光层路由保护
 						wpr.setprolinklist(totallink);
 						wpr.setproroute(opPrtectRoute);
 						wpr.setFSoneachLink(FSuseOnlink);
+						wpr.setcostoftransForSingle(ptoftransp.getcostOftransForsingle());
 						wpr.setprovirtuallinklist(provirtuallinklist);
 						wpr.setregthinglist(null);
 					}
@@ -446,7 +449,7 @@ public class opProGrooming {// 光层路由保护
 			for (WorkandProtectRoute wpr : wprlist) {
 				if (shareslotWPR.keySet().contains(wpr)) {
 					if (shareslotWPR.get(wpr).size() != 0) {
-						file_io.filewrite_without(OutFileName, "链路 " + link.getName() + " 上可以共享的slot为 ");
+//						file_io.filewrite_without(OutFileName, "链路 " + link.getName() + " 上可以共享的slot为 ");
 						// System.out.print("链路 " + link.getName() + "
 						// 上可以共享的slot为 ");
 						for (int release : shareslotWPR.get(wpr)) {// 释放可共享资源
@@ -476,10 +479,10 @@ public class opProGrooming {// 光层路由保护
 							// link.getSlotsarray().get(release).getoccupiedreqlist().remove(res);
 							link.getSlotsarray().get(release).getoccupiedreqlist().remove(request);
 							// test
-							file_io.filewrite_without(OutFileName, release + "  ");
+//							file_io.filewrite_without(OutFileName, release + "  ");
 							// System.out.print(release + " ");
 						}
-						file_io.filewrite2(OutFileName, " ");
+//						file_io.filewrite2(OutFileName, " ");
 					}
 				}
 			}

@@ -24,7 +24,14 @@ public class WorkandProtectRoute {//一条业务工作路径 保护路径 以及上面使用的再生
 	 private Request request=null;
 	 private ArrayList<Double> RegWorkLengthList=new ArrayList<Double>();
 	 private ArrayList<Double> RegProLengthList=new ArrayList<Double>();
+	 private double costoftransForSingle=0;
 	 
+		public void setcostoftransForSingle(double  costoftransForSingle) {
+			this.costoftransForSingle=costoftransForSingle;
+		}
+		public double getcostoftransForSingle() {
+			return costoftransForSingle;
+		}
 		public void setRegProLengthList(ArrayList<Double> RegProLengthList) {
 			this.RegProLengthList=RegProLengthList;
 		}
