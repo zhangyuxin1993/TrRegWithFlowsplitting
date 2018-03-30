@@ -21,7 +21,7 @@ import MainFunction.FSshareOnlink;
 public class opProGrooming {// 光层路由保护
 	String OutFileName = Mymain.OutFileName;
 
-	public boolean opprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair, LinearRoute route,
+	public boolean opprotectiongrooming(Layer iplayer, Layer oplayer, NodePair nodepair,
 			ParameterTransfer ptoftransp, boolean flag, ArrayList<WorkandProtectRoute> wprlist, float threshold,
 			ArrayList<RequestOnWorkLink> rowList, ArrayList<FlowUseOnLink> FlowUseList) throws IOException {// flag=true表示保护IP层建立的工作路径
 		// flag=flase表示光层建立的工作路径
@@ -35,7 +35,6 @@ public class opProGrooming {// 光层路由保护
 		file_out_put file_io = new file_out_put();
 		ArrayList<VirtualLink> provirtuallinklist = new ArrayList<>();
 		ArrayList<FSshareOnlink> FSuseOnlink = new ArrayList<FSshareOnlink>();
-		ArrayList<Link> opDelLink = new ArrayList<Link>();
 		ArrayList<Double> ProLengthList = new ArrayList<Double>();
 		ArrayList<LinearRoute> routeList = new ArrayList<>();
 
@@ -43,41 +42,20 @@ public class opProGrooming {// 光层路由保护
 		file_io.filewrite2(OutFileName, "************保护路由在IP层不能路由，需要在光层新建");
 
 		// 删除该节点对的工作路由经过的所有物理链路
-//		file_io.filewrite2(OutFileName, "！！!!!!!! 工作路由为");
-//		route.OutputRoute_node(route, OutFileName);
-//		file_io.filewrite2(OutFileName, " ");
-		for (Link LinkOnRoute : route.getLinklist()) {// 取出工作路由中的链路
-			if (flag) {//// flag=true表示保护 IP层建立的工作路径
-				for (VirtualLink Vlink : LinkOnRoute.getVirtualLinkList()) {
-					for (Link LinkOnPhy : Vlink.getPhysicallink()) {// 取出某一工作链路上对应的物理链路
-
-						HashMap<String, Link> oplinklist = oplayer.getLinklist();
-						Iterator<String> oplinkitor = oplinklist.keySet().iterator();
-						while (oplinkitor.hasNext()) {
-							Link oplink = (Link) (oplinklist.get(oplinkitor.next()));
-							// System.out.println("物理层链路遍历：" +oplink.getName());
-							if (oplink.getName().equals(LinkOnPhy.getName())) {
-								if (!opDelLink.contains(oplink))
-									opDelLink.add(oplink);
-								break;
-							}
-						}
-					}
-				}
-			} else {// flag=false表示保护 光层建立的工作路径
-				HashMap<String, Link> oplinklist = oplayer.getLinklist();
-				Iterator<String> oplinkitor = oplinklist.keySet().iterator();
-				while (oplinkitor.hasNext()) {
-					Link oplink = (Link) (oplinklist.get(oplinkitor.next()));
-					// System.out.println("物理层链路遍历：" + oplink.getName());
-					if (oplink.getName().equals(LinkOnRoute.getName())) {
-						// System.out.println("删除的光层链路： " + oplink.getName());
-						opDelLink.add(oplink);
-						break;
-					}
+		
+		ArrayList<Link> opDelLink=new ArrayList<>();
+		for(WorkandProtectRoute wpr:wprlist){
+			if(wpr.getrequest().getNodepair().equals(nodepair)){
+				file_io.filewrite2(OutFileName, "工作路径经过的物理链路：");
+				for(Link link: wpr.getworklinklist()){
+					file_io.filewrite_without(OutFileName, link.getName()+"  ");
+					if(!opDelLink.contains(link))
+					opDelLink.add(link);
 				}
 			}
 		}
+		
+		
 		// 以上为第一部分 删除光层上所有工作链路经过的物理链路
 //		file_io.filewrite2(OutFileName, "光层上删除的链路 ");
 		for (Link opdellink : opDelLink) {
