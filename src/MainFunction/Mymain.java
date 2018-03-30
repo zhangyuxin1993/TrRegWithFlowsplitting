@@ -19,7 +19,7 @@ public class Mymain {
 	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239_FinalResult.dat";
 	public static void main(String[] args) throws IOException {
 		String TopologyName = "D:/zyx/Topology/cost239.csv";
-		int DemandNum=15;
+		int DemandNum=10;
 		ParameterTransfer pt=new ParameterTransfer();
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -30,19 +30,19 @@ public class Mymain {
 		network_base.createNodepair();// 每个layer都生成节点对 产生节点对的时候会自动生成nodepair之间的demand
 		Layer iplayer_base = network_base.getLayerlist().get("Layer0");
 	
-//		DemandRadom dr=new DemandRadom();
-//		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
-//		dr.TrafficNumRadom(RadomNodepairlist);
-//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-//			file_io.filewrite2(FinalResultFile, np.getName());
-//		}
-//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-//			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
-//		}
+		DemandRadom dr=new DemandRadom();
+		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
+		dr.TrafficNumRadom(RadomNodepairlist);
+		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+			file_io.filewrite2(FinalResultFile, np.getName());
+		}
+		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
+		}
 		//以下可以读取表格中的业务
-		ReadDemand rd=new ReadDemand();
-		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\6Traffic.csv");
- 
+//		ReadDemand rd=new ReadDemand();
+//		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\6Traffic.csv");
+// 
 		/*
 		 * 设置threshold循环
 		 */
@@ -114,6 +114,7 @@ public class Mymain {
 			
 			int demandnum=0,TotalWorkRegNum=0,TotalWorkIPReg=0,
 					TotalProRegNum=0,TotalProIPReg=0;
+			double TotalIPRegCost=0;
 			ArrayList<Regenerator> reglist=new ArrayList<>();
 			if(wprlist.size()!=DemandNum) {
 				file_io.filewrite2(FinalResultFile, "此次shuffle无法完成所有业务" );
@@ -169,6 +170,7 @@ public class Mymain {
 //									file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
 								}
 								WorkCost=WorkCost+cost;
+								TotalIPRegCost=TotalIPRegCost+cost;
 								}
 						}
 						else{
@@ -245,7 +247,7 @@ public class Mymain {
 				//计算保护路径的cost
 				double ProEachcost=0;
 				if(wpr.getnewreglist().size()!=0){
-					ProEachcost=mm.ProCostCalculate(wpr);
+					ProEachcost=mm.ProCostCalculate(wpr,pt);
 				}
 					file_io.filewrite2(FinalResultFile,"保护路径再生器的cost= " +ProEachcost);
 					TotalProCost=TotalProCost+ProEachcost;
@@ -341,7 +343,7 @@ public class Mymain {
 			double TotalCost=TotalProCost+TotalWorkCost;
 			file_io.filewrite2(FinalResultFile, " ");
 			file_io.filewrite2(FinalResultFile, "Total cost of reg in network："+ TotalCost);
-			double RegwithTrans=TotalCost+pt.getcost_of_tranp();
+			double RegwithTrans=TotalCost+pt.getcost_of_tranp()+pt.getcostOfIPreg();
 			file_io.filewrite2(FinalResultFile, "RegCost+TransCost："+ RegwithTrans);
 			
 			if(RegwithTrans<bestResult){
@@ -349,7 +351,7 @@ public class Mymain {
 				bestshuffle=shuffle;
 				NumOfIPreg=TotalProIPReg+TotalWorkIPReg;
 				NumofOEOreg=TotalProRegNum+TotalWorkRegNum-TotalProIPReg-TotalWorkIPReg;
-				NumofTrans=pt.getNumOfTransponder();
+				NumofTrans=pt.getNumOfTransponder()+NumOfIPreg;
 			}
 			
 		}
@@ -464,10 +466,10 @@ public class Mymain {
 		return sameindex;
 	}
 	
-	public double ProCostCalculate(WorkandProtectRoute wpr) {
+	public double ProCostCalculate(WorkandProtectRoute wpr,ParameterTransfer pt) {
 		double TotalProCost=0;
 		file_out_put file_io=new file_out_put();
-		
+		double IPRegcost=0;
 		for(int count=0;count<wpr.getRegProLengthList().size()-1;count++){
 			Regenerator reg= wpr.getRegeneratorlist().get(count);
 			if(wpr.getnewreglist().contains(reg)){//该再生器为新建的再生器
@@ -476,21 +478,17 @@ public class Mymain {
 					file_io.filewrite2(FinalResultFile,"保护路径上第"+count+"个OEO再生器两端的cost");
 					for(int num=count;num<=count+1;num++){
 					double length=	wpr.getRegProLengthList().get(num);
-//					file_io.filewrite2(FinalResultFile,"距离为 "+length);
 					if (length > 2000 && length <= 4000) {
 						cost=Constant.Cost_OEO_reg_BPSK;
-//						file_io.filewrite2(FinalResultFile,"采用BPSK,cost为："+ cost);
 					} else if (length > 1000 && length <= 2000) {
 						cost=Constant.Cost_OEO_reg_QPSK;
-//						file_io.filewrite2(FinalResultFile,"采用QPSK,cost为："+ cost);
 					} else if (length > 500 && length <= 1000) {
 						cost=Constant.Cost_OEO_reg_8QAM;
-//						file_io.filewrite2(FinalResultFile,"采用8QAM,cost为："+ cost);
 					} else if (length > 0 && length <= 500) {
 						cost=Constant.Cost_OEO_reg_16QAM;
-//						file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
 					}
 						TotalProCost = TotalProCost + cost;
+						
 					}
 				}
 				if(reg.getNature()==1){//IP再生器
@@ -513,10 +511,12 @@ public class Mymain {
 //						file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
 					}
 						TotalProCost = TotalProCost + cost;
+						IPRegcost=IPRegcost+cost;
 					}
 				}
 				}
 			}
+		pt.setcostOfIPreg(IPRegcost);
 		return TotalProCost;
 	}
 public void NodepairListset(Layer ipLayer,ArrayList<NodePair> nodepairlist) {
@@ -563,7 +563,6 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,Parameter
 	
 	boolean iproutingFlag = false;
 	boolean ipproFlag = false;
-	LinearRoute ipWorkRoute = new LinearRoute(null, 0, null);
 	LinearRoute opWorkRoute = new LinearRoute(null, 0, null);
 	ArrayList<RequestOnWorkLink> rowList=new ArrayList<>();
 	ArrayList<FlowUseOnLink> FlowUseList=new ArrayList<>();
@@ -576,7 +575,7 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,Parameter
 		ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair, true,wprlist);
 		if (!ipproFlag) {// 在ip层保护路由受阻 则在光层路由保护
 			opProGrooming opg = new opProGrooming();
-			opg.opprotectiongrooming(iplayer, oplayer, nodepair, ipWorkRoute, ptoftransp, true, wprlist,threshold,rowList,FlowUseList);
+			opg.opprotectiongrooming(iplayer, oplayer, nodepair, ptoftransp, true, wprlist,threshold,rowList,FlowUseList);
 		}
 	}
 	
@@ -589,7 +588,7 @@ public void mainMethod(NodePair nodepair, Layer iplayer, Layer oplayer,Parameter
 			ipproFlag = ipprog.ipprotectiongrooming(iplayer, oplayer, nodepair,false, wprlist);
 			if (!ipproFlag) {// 在ip层保护路由受阻 则在光层路由保护
 				opProGrooming opg = new opProGrooming();
-				opg.opprotectiongrooming(iplayer, oplayer, nodepair, opWorkRoute, ptoftransp, false,
+				opg.opprotectiongrooming(iplayer, oplayer, nodepair, ptoftransp, false,
 						wprlist,threshold,rowList,FlowUseList);
 			}
 			

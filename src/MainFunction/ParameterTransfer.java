@@ -18,6 +18,14 @@ public class ParameterTransfer {
 	int numOfTransponder=0;
 	double cost_of_tranp=0;
 	double costOftransForsingle=0;
+	double costOfIPreg=0;
+	
+	public double getcostOfIPreg() {
+		return costOfIPreg;
+	}
+	public void setcostOfIPreg(double  costOfIPreg) {
+		 this.costOfIPreg=costOfIPreg;
+	}
 
 	public double getcostOftransForsingle() {
 		return costOftransForsingle;

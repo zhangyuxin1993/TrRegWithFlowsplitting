@@ -125,6 +125,7 @@ public class IPWorkingGrooming {
 				wpr.setworklinklist(totallink);
 				wprlist.add(wpr);
 				file_io.filewrite2(OutFileName,"工作路径在IP层路由成功");
+				
 			}
 			if(!routeFlag){ 
 				file_io.filewrite2(OutFileName,"工作路径IP层路由失败");
