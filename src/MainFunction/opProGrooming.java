@@ -171,9 +171,6 @@ public class opProGrooming {// 光层路由保护
 							int m = index_wave.get(0);
 							for (int n = 0; n < slotnum; n++) {
 								index_wave1.add(m);
-								// System.out.print(m);
-								// file_io.filewrite_without(OutFileName, m + "
-								// ");
 								m++;
 							}
 							FSshareOnlink fsonLink = new FSshareOnlink(link, index_wave1);

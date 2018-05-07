@@ -679,17 +679,14 @@ public class ProregeneratorPlace {
 			cost = cost + link.getCost();
 			ResourceOnLink ro = new ResourceOnLink(request, link, index_wave.get(0), slotnum);
 			link.setMaxslot(slotnum + link.getMaxslot());
-			//System.out.print("链路 " + link.getName() + "上分配的FS为 ");
 			file_io.filewrite_without(OutFileName, "链路 " + link.getName() + "上分配的FS为 ");
 			file_io.filewrite2(OutFileName, "");
 			int m = index_wave.get(0);
 			for (int n = 0; n < slotnum; n++) {
 				index_wave1.add(m);
-				//System.out.print(m);
 				file_io.filewrite_without(OutFileName, m + "  ");
 				m++;
 			}
-			//System.out.println();
 			file_io.filewrite2(OutFileName, " ");
 			FSshareOnlink fsonLink = new FSshareOnlink(link, index_wave1);
 			FSoneachLink.add(fsonLink);

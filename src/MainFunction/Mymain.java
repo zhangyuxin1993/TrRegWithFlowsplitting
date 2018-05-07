@@ -2,7 +2,6 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -30,18 +29,18 @@ public class Mymain {
 		network_base.createNodepair();// 每个layer都生成节点对 产生节点对的时候会自动生成nodepair之间的demand
 		Layer iplayer_base = network_base.getLayerlist().get("Layer0");
 	
-		DemandRadom dr=new DemandRadom();
-		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
-		dr.TrafficNumRadom(RadomNodepairlist);
-		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-			file_io.filewrite2(FinalResultFile, np.getName());
-		}
-		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
-			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
-		}
+//		DemandRadom dr=new DemandRadom();
+//		RadomNodepairlist=dr.NodePairRadom(DemandNum,TopologyName,iplayer_base);//随机产生结对
+//		dr.TrafficNumRadom(RadomNodepairlist);
+//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+//			file_io.filewrite2(FinalResultFile, np.getName());
+//		}
+//		for(NodePair np:RadomNodepairlist){//输出随机产生节点对的大小
+//			file_io.filewrite(FinalResultFile, np.getTrafficdemand());
+//		}
 		//以下可以读取表格中的业务
-//		ReadDemand rd=new ReadDemand();
-//		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\6Traffic.csv");
+		ReadDemand rd=new ReadDemand();
+		RadomNodepairlist=rd.readDemand(iplayer_base, "D:\\6Traffic.csv");
 // 
 		/*
 		 * 设置threshold循环
@@ -57,6 +56,7 @@ public class Mymain {
 			double TotalWorkCost=0,TotalProCost=0;
 			pt.setNumOfTransponder(0);
 			pt.setcost_of_tranp(0);
+			pt.setcostOfIPreg(0);
 			file_io.filewrite2(OutFileName, " ");
 			file_io.filewrite2(FinalResultFile, " ");
 			file_io.filewrite2(OutFileName, "threshold="+threshold);
@@ -114,7 +114,6 @@ public class Mymain {
 			
 			int demandnum=0,TotalWorkRegNum=0,TotalWorkIPReg=0,
 					TotalProRegNum=0,TotalProIPReg=0;
-			double TotalIPRegCost=0;
 			ArrayList<Regenerator> reglist=new ArrayList<>();
 			if(wprlist.size()!=DemandNum) {
 				file_io.filewrite2(FinalResultFile, "此次shuffle无法完成所有业务" );
@@ -149,50 +148,48 @@ public class Mymain {
 					//工作的cost  
 //					/*
 					double WorkCost=0;
-					for(int count=0;count<wpr.getRegWorkLengthList().size()-1;count++){
+					int linkNum=0;
+					for(int count=0;count<wpr.getRegWorkLengthList().size();count++){
 						double cost=0;
-						if(FinalRoute.getIPRegnode().contains(count+1)){//说明该节点上的是IP再生器
-							file_io.filewrite2(FinalResultFile,"工作路径上第"+count+"个再生器(IP)两端的cost");
-							for(int num=count;num<=count+1;num++){
-								double length=	wpr.getRegWorkLengthList().get(num);
-								file_io.filewrite2(FinalResultFile,"距离为 "+length);
-								if (length > 2000 && length <= 4000) {
-									cost=Constant.Cost_IP_reg_BPSK;
-//									file_io.filewrite2(FinalResultFile,"采用BPSK,cost为："+ cost);
-								} else if (length > 1000 && length <= 2000) {
-									cost=Constant.Cost_IP_reg_QPSK;
-//									file_io.filewrite2(FinalResultFile,"采用QPSK,cost为："+ cost);
-								} else if (length > 500 && length <= 1000) {
-									cost=Constant.Cost_IP_reg_8QAM;
-//									file_io.filewrite2(FinalResultFile,"采用8QAM,cost为："+ cost);
-								} else if (length > 0 && length <= 500) {
-									cost=Constant.Cost_IP_reg_16QAM;
-//									file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
+						if(FinalRoute.getregnode().contains(count+1)){//该点放置再生器
+							if(FinalRoute.getIPRegnode().contains(count+1)){//说明该节点上的是IP再生器
+								file_io.filewrite2(FinalResultFile,"工作路径上第"+count+"个再生器(IP)两端的cost");
+								for(int num=linkNum;num<=linkNum+1;num++){
+									double length=	wpr.getRegWorkLengthList().get(num);
+									file_io.filewrite2(FinalResultFile,"距离为 "+length);
+									if (length > 2000 && length <= 4000) {
+										cost=Constant.Cost_IP_reg_BPSK;
+									} else if (length > 1000 && length <= 2000) {
+										cost=Constant.Cost_IP_reg_QPSK;
+									} else if (length > 500 && length <= 1000) {
+										cost=Constant.Cost_IP_reg_8QAM;
+									} else if (length > 0 && length <= 500) {
+										cost=Constant.Cost_IP_reg_16QAM;
+									}
+									WorkCost=WorkCost+cost;
+									pt.setcostOfIPreg(pt.getcostOfIPreg()+cost);//加入工作IPreg cost
+									file_io.filewrite2(FinalResultFile,"cost=："+cost);
 								}
-								WorkCost=WorkCost+cost;
-								TotalIPRegCost=TotalIPRegCost+cost;
-								}
-						}
-						else{
-							file_io.filewrite2(FinalResultFile,"工作路径上第"+count+"个再生器(OEO)两端的cost");
-							for(int num=count;num<=count+1;num++){
-								double length=	wpr.getRegWorkLengthList().get(num);
-//								file_io.filewrite2(FinalResultFile,"距离为 "+length);
-								if (length > 2000 && length <= 4000) {
-									cost=Constant.Cost_OEO_reg_BPSK;
-//									file_io.filewrite2(FinalResultFile,"采用BPSK,cost为："+ cost);
-								} else if (length > 1000 && length <= 2000) {
-									cost=Constant.Cost_OEO_reg_QPSK;
-//									file_io.filewrite2(FinalResultFile,"采用QPSK,cost为："+ cost);
-								} else if (length > 500 && length <= 1000) {
-									cost=Constant.Cost_OEO_reg_8QAM;
-//									file_io.filewrite2(FinalResultFile,"采用8QAM,cost为："+ cost);
-								} else if (length > 0 && length <= 500) {
-									cost=Constant.Cost_OEO_reg_16QAM;
-//									file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
-								}
-								WorkCost=WorkCost+cost;
 							}
+							else{
+								file_io.filewrite2(FinalResultFile,"工作路径上第"+count+"个再生器(OEO)两端的cost");
+								for(int num=linkNum;num<=linkNum+1;num++){
+									double length=	wpr.getRegWorkLengthList().get(num);
+									file_io.filewrite2(FinalResultFile,"距离为 "+length);
+									if (length > 2000 && length <= 4000) {
+										cost=Constant.Cost_OEO_reg_BPSK;
+									} else if (length > 1000 && length <= 2000) {
+										cost=Constant.Cost_OEO_reg_QPSK;
+									} else if (length > 500 && length <= 1000) {
+										cost=Constant.Cost_OEO_reg_8QAM;
+									} else if (length > 0 && length <= 500) {
+										cost=Constant.Cost_OEO_reg_16QAM;
+									}
+									WorkCost=WorkCost+cost;
+									file_io.filewrite2(FinalResultFile,"cost=："+cost);
+								}
+							}
+							linkNum++;
 						}
 					}
 					file_io.filewrite2(FinalResultFile,"工作再生器总的cost为："+ WorkCost);
@@ -310,8 +307,16 @@ public class Mymain {
 							break;
 						}
 				}
+				//计算所有链路使用的slot数
+				int singleslot=0;
+				for (int start = link.getSlotsarray().size()-1; start >= 0; start--) {
+					if (link.getSlotsarray().get(start).getoccupiedreqlist().size() != 0) {// 该波长已经被占用
+						AllSoltUse++;
+						singleslot++;
+					}
+			}
+				file_io.filewrite2(FinalResultFile, "link="+link.getName()+" 上使用的FS="+ singleslot);
 				file_io.filewrite2(FinalResultFile, "link "+ link.getName()+" MaxSlot="+ Maxslot);
-				AllSoltUse=AllSoltUse+Maxslot;
 				if(Maxslot>maxSlotofOneShuffle){
 					maxSlotofOneShuffle=Maxslot;
 				}
@@ -342,8 +347,11 @@ public class Mymain {
 
 			double TotalCost=TotalProCost+TotalWorkCost;
 			file_io.filewrite2(FinalResultFile, " ");
+			file_io.filewrite2(FinalResultFile, "Total cost of IP reg in network："+ pt.getcostOfIPreg());
 			file_io.filewrite2(FinalResultFile, "Total cost of reg in network："+ TotalCost);
-			double RegwithTrans=TotalCost+pt.getcost_of_tranp()+pt.getcostOfIPreg();
+			double costOftrans=pt.getcost_of_tranp()+pt.getcostOfIPreg();
+			file_io.filewrite2(FinalResultFile, "Total cost of trans in network："+ costOftrans);
+			double RegwithTrans=TotalCost+costOftrans;
 			file_io.filewrite2(FinalResultFile, "RegCost+TransCost："+ RegwithTrans);
 			
 			if(RegwithTrans<bestResult){
@@ -469,7 +477,6 @@ public class Mymain {
 	public double ProCostCalculate(WorkandProtectRoute wpr,ParameterTransfer pt) {
 		double TotalProCost=0;
 		file_out_put file_io=new file_out_put();
-		double IPRegcost=0;
 		for(int count=0;count<wpr.getRegProLengthList().size()-1;count++){
 			Regenerator reg= wpr.getRegeneratorlist().get(count);
 			if(wpr.getnewreglist().contains(reg)){//该再生器为新建的再生器
@@ -478,6 +485,7 @@ public class Mymain {
 					file_io.filewrite2(FinalResultFile,"保护路径上第"+count+"个OEO再生器两端的cost");
 					for(int num=count;num<=count+1;num++){
 					double length=	wpr.getRegProLengthList().get(num);
+					file_io.filewrite2(FinalResultFile,"length=："+length);
 					if (length > 2000 && length <= 4000) {
 						cost=Constant.Cost_OEO_reg_BPSK;
 					} else if (length > 1000 && length <= 2000) {
@@ -488,6 +496,7 @@ public class Mymain {
 						cost=Constant.Cost_OEO_reg_16QAM;
 					}
 						TotalProCost = TotalProCost + cost;
+						file_io.filewrite2(FinalResultFile,"cost=："+cost);
 						
 					}
 				}
@@ -496,27 +505,24 @@ public class Mymain {
 					file_io.filewrite2(FinalResultFile,"保护路径上第"+count+"个IP再生器两端的cost");
 					for(int num=count;num<=count+1;num++){
 					double length=	wpr.getRegProLengthList().get(num);
-					file_io.filewrite2(FinalResultFile,"距离为 "+length);
+					file_io.filewrite2(FinalResultFile,"length= "+length);
 					if (length > 2000 && length <= 4000) {
 						cost=Constant.Cost_IP_reg_BPSK;
-//						file_io.filewrite2(FinalResultFile,"采用BPSK,cost为："+ cost);
 					} else if (length > 1000 && length <= 2000) {
 						cost=Constant.Cost_IP_reg_QPSK;
-//						file_io.filewrite2(FinalResultFile,"采用QPSK,cost为："+ cost);
 					} else if (length > 500 && length <= 1000) {
 						cost=Constant.Cost_IP_reg_8QAM;
-//						file_io.filewrite2(FinalResultFile,"采用8QAM,cost为："+ cost);
 					} else if (length > 0 && length <= 500) {
 						cost=Constant.Cost_IP_reg_16QAM;
-//						file_io.filewrite2(FinalResultFile,"采用16QAM,cost为："+ cost);
 					}
 						TotalProCost = TotalProCost + cost;
-						IPRegcost=IPRegcost+cost;
+						pt.setcostOfIPreg(pt.getcostOfIPreg()+cost);	//加入保护IPreg cost
+						file_io.filewrite2(FinalResultFile,"cost=："+cost);
 					}
 				}
 				}
 			}
-		pt.setcostOfIPreg(IPRegcost);
+	
 		return TotalProCost;
 	}
 public void NodepairListset(Layer ipLayer,ArrayList<NodePair> nodepairlist) {
