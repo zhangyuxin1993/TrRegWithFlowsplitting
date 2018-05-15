@@ -15,11 +15,11 @@ import network.NodePair;
 import subgraph.LinearRoute;
 
 public class Mymain {
-	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\USNET.dat";
-	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\USNETFinalResult.dat";
+	public static String OutFileName = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239.dat";
+	public static String FinalResultFile = "D:\\zyx\\programFile\\RegwithProandTrgro\\cost239FinalResult.dat";
 	public static void main(String[] args) throws IOException {
-		String TopologyName = "D:/zyx/Topology/USNET.csv";
-		int DemandNum=5;
+		String TopologyName = "D:/zyx/Topology/cost239.csv";
+		int DemandNum=40;
 		ParameterTransfer pt=new ParameterTransfer();
 		file_out_put file_io=new file_out_put();
 		Mymain mm=new Mymain();
@@ -46,14 +46,15 @@ public class Mymain {
 		/*
 		 * 设置threshold循环
 		 */
-		for(float threshold=(float) 0.5;threshold<=1.05; threshold=(float) (threshold+1)){
-			double bestResult=100000,AverageCost=0,TotalCostallShuffle=0;
-			int bestshuffle=1000,NumOfIPreg=0,NumofOEOreg=0,NumofTrans=0,times=0;
+		for(float threshold=(float) 0;threshold<=1.05; threshold=(float) (threshold+0.1)){
+			ArrayList<Double> results=new ArrayList<>();
+			double bestResult=100000,AverageCost=0;
+			int bestshuffle=1000,NumOfIPreg=0,NumofOEOreg=0,NumofTrans=0;
 			int bestSingleshuffle=0,bestAllshuffle=0;
 			int MinSlotofAllShuffleOnSingleLink=10000;
 			int MinSlotofAllShuffleofAllLink=10000;
 			
-		for(int shuffle=0;shuffle<5;shuffle++){//打乱次序100次
+		for(int shuffle=0;shuffle<50;shuffle++){//打乱次序100次
 			double TotalWorkCost=0,TotalProCost=0;
 			pt.setNumOfTransponder(0);
 			pt.setcost_of_tranp(0);
@@ -348,7 +349,6 @@ public class Mymain {
 
 			double TotalCost=TotalProCost+TotalWorkCost;
 			
-			times++;
 			file_io.filewrite2(FinalResultFile, " ");
 			file_io.filewrite2(FinalResultFile, "Total cost of IP reg in network："+ pt.getcostOfIPreg());
 			file_io.filewrite2(FinalResultFile, "Total cost of reg in network："+ TotalCost);
@@ -356,9 +356,9 @@ public class Mymain {
 			double costOftrans=pt.getcost_of_tranp();
 			file_io.filewrite2(FinalResultFile, "Total cost of trans in network："+ costOftrans);
 			double RegwithTrans=TotalCost+costOftrans;
-			TotalCostallShuffle=TotalCostallShuffle+RegwithTrans;
 			file_io.filewrite2(FinalResultFile, "RegCost+TransCost："+ RegwithTrans);
 			
+			results.add(RegwithTrans);//保存每次的cost结果
 			if(RegwithTrans<bestResult){
 				bestResult=RegwithTrans;
 				bestshuffle=shuffle;
@@ -367,8 +367,12 @@ public class Mymain {
 				NumofTrans=pt.getNumOfTransponder();
 			}
 			
+		}//结束单一的一次shuflle
+		double AllShuffleCost=0,Times=0;
+		for(double c: results){
+			Times++;
+			AllShuffleCost=AllShuffleCost+c;
 		}
-		
 		file_io.filewrite2(FinalResultFile, "");	
 		file_io.filewrite2(FinalResultFile, "所有shuffle中 单个链路最大slot 最小的是： "+ MinSlotofAllShuffleOnSingleLink+" shuffle="+ bestSingleshuffle);
 		file_io.filewrite2(FinalResultFile, "所有shuffle中 所有链路slot综合 最小的是： "+ MinSlotofAllShuffleofAllLink+" shuffle="+ bestAllshuffle);
@@ -376,10 +380,18 @@ public class Mymain {
 		file_io.filewrite2(FinalResultFile, "Best shuffle="+bestshuffle+"  Best Result="+bestResult);
 		file_io.filewrite2(FinalResultFile, "Num of IP reg="+NumOfIPreg+"  Num of OEO reg="+NumofOEOreg);
 		file_io.filewrite2(FinalResultFile, "Num of trans="+NumofTrans);
-		AverageCost=TotalCostallShuffle/times;
-		file_io.filewrite2(FinalResultFile, "total="+TotalCostallShuffle+"   times="+ times +"  Average cost="+AverageCost);
-		file_io.filewrite2(FinalResultFile, "Finish a threshold");
+		AverageCost=AllShuffleCost/Times;
+		file_io.filewrite2(FinalResultFile, "total="+AllShuffleCost+"   times="+ Times +"  Average cost="+AverageCost);
+		double add=0;
+		for(double c:results){
+			double minusSqur=Math.pow(c-AverageCost, 2);
+			add=add+minusSqur;
 		}
+		double SqureError=Math.sqrt(add/Times);//计算出平方差
+		double ErrorResult=SqureError*1.96;
+		file_io.filewrite2(FinalResultFile, "ErrorArea="+ErrorResult);
+		file_io.filewrite2(FinalResultFile, "Finish a threshold");
+		}//完成一个threshold
 		System.out.println("Finish");
 	}
 //main函数结束

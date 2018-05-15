@@ -27,28 +27,6 @@ public class ipProGrooming {
 		ArrayList<Link> DelIPLinkList = new ArrayList<Link>();
 		ArrayList<Link> totallink = new ArrayList<>();
 		
-//		HashMap<String, Link> linklisttest = iplayer.getLinklist();
-//		ArrayList<VirtualLink> VirtualLinklist = new ArrayList<VirtualLink>();
-//		Iterator<String> linkitortest = linklisttest.keySet().iterator();
-//		while (linkitortest.hasNext()) {
-//			Link Mlink = (Link) (linklisttest.get(linkitortest.next()));
-//			file_io.filewrite2(OutFileName,"IP层上的链路为：" +  Mlink.getName());
-//			VirtualLinklist = Mlink.getVirtualLinkList();//取出IP层上的链路对应的虚拟链路 新建一个list使其本身的虚拟链路不改变						
-//			for (VirtualLink Vlink : VirtualLinklist) { // 取出link上对应的virtua
-//			file_io.filewrite2(OutFileName,"该IP链路上的虚拟链路为：" +  Vlink.getSrcnode()+"-"+Vlink.getDesnode()
-//			+"   性质为："+Vlink.getNature()+ "  剩余的流量为"+Vlink.getRestcapacity());
-//			
-//			}
-//		}
-
-		//test
-//		for(WorkandProtectRoute wprpro:wprlist){
-//			System.out.println(wprpro.getdemand().getName());
-//			for(VirtualLink vprolink:wprpro.getprovirtuallinklist()){
-//				System.out.println(vprolink.getSrcnode()+"  "+vprolink.getDesnode());
-//			}
-//		}
-		
 		HashMap<String, Link> linklist = iplayer.getLinklist();
 		Iterator<String> linkitor = linklist.keySet().iterator();
 		while (linkitor.hasNext()) {// 第一部分 第一步
